@@ -1,0 +1,228 @@
+.card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  border-color: #cbd5e1;
+}
+
+.outOfStockCard {
+  opacity: 0.6;
+}
+
+.imageContainer {
+  height: 125px;
+  background: #f8fafc;
+  position: relative;
+  width: 100%;
+  overflow: visible; /* Need overflow visible for overlapping ADD button */
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+}
+
+.outOfStockOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 5;
+}
+
+.outOfStockText {
+  color: white;
+  background: #ef4444;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.vegIcon {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #16a34a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  border-radius: 2px;
+}
+
+.vegDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #16a34a;
+}
+
+.addButtonWrapper {
+  position: absolute;
+  bottom: -14px;
+  right: 12px;
+  z-index: 10;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.addButton {
+  background: #e8f5e9;
+  border: 1.5px solid #16a34a;
+  color: #16a34a;
+  border-radius: 6px;
+  height: 28px;
+  width: 68px;
+  font-weight: 800;
+  font-size: 11px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.addButton:hover {
+  background: #c8e6c9;
+}
+
+.controlContainer {
+  display: flex;
+  align-items: center;
+  background: #16a34a;
+  color: white;
+  border-radius: 6px;
+  height: 28px;
+  width: 68px;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+
+.actionButton {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quantityText {
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  min-width: 14px;
+}
+
+.infoContainer {
+  padding: 12px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.unitTag {
+  background: #f1f5f9;
+  align-self: flex-start;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.unitText {
+  font-size: 10px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+  height: 34px; /* Fix height to occupy exactly two lines */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  margin-bottom: 6px;
+}
+
+.deliveryRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.clockIcon {
+  color: #16a34a;
+}
+
+.deliveryText {
+  font-size: 10px;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.discountText {
+  font-size: 10px;
+  font-weight: 800;
+  color: #2563eb;
+  margin-bottom: 4px;
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.price {
+  font-size: 14px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.originalPrice {
+  font-size: 10px;
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
+
