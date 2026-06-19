@@ -21,7 +21,7 @@ export default function Navbar({
   else if (pathname.startsWith('/categories')) activeTab = 'categories';
   else if (pathname.startsWith('/orders')) activeTab = 'orders';
 
-  const { activeAddress, deliveryETA, serviceAvailable } = useContext(AuthContext);
+  const { activeAddress, deliveryETA, serviceAvailable, isAuthenticated } = useContext(AuthContext);
   const { cartTotalQuantity } = useContext(CartContext);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -81,7 +81,10 @@ export default function Navbar({
                 </div>
               </button>
 
-              <button className={`${styles.actionBtn} ${styles.profileBtn}`}>
+              <button 
+                className={`${styles.actionBtn} ${styles.profileBtn}`}
+                onClick={() => router.push(isAuthenticated ? '/profile' : '/login')}
+              >
                 <User size={18} />
               </button>
             </div>

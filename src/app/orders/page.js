@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ShoppingBag, MapPin, AlertTriangle, CheckCircle, Clock, Sparkles, ChevronRight, Package, RotateCcw, Check } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 import { CartContext } from '../../context/CartContext';
+import SafeImage from '../../components/SafeImage';
 import { MOCK_PRODUCTS, INITIAL_ORDERS } from '../data';
 import styles from '../page.module.css';
 
@@ -145,8 +146,7 @@ export default function OrdersPage() {
                 <div className={styles.thumbnailScroll}>
                   {order.items.slice(0, 4).map((item, idx) => (
                     <div key={idx} className={styles.thumbnailWrapper}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={getProductImage(item.productId)} alt={item.name} className={styles.thumbnailImage} />
+                      <SafeImage src={getProductImage(item.productId)} alt={item.name} className={styles.thumbnailImage} />
                       <div className={styles.thumbnailBadge}>
                         <span>{item.quantity}</span>
                       </div>
@@ -251,8 +251,7 @@ export default function OrdersPage() {
                       {order.items.map((item, idx) => (
                         <div key={idx} className={styles.expandedItemRow}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={getProductImage(item.productId)} alt={item.name} className={styles.expandedItemImg} />
+                            <SafeImage src={getProductImage(item.productId)} alt={item.name} className={styles.expandedItemImg} />
                             <div>
                               <h5 className={styles.expandedItemName}>{item.name}</h5>
                               <span className={styles.expandedItemMeta}>{MOCK_PRODUCTS.find(p => p.id === item.productId)?.unit || '1 unit'}</span>

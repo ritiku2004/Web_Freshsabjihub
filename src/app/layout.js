@@ -1,8 +1,6 @@
 import "./globals.css";
 import { Providers } from "./providers";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import styles from "./page.module.css";
+import ConditionalLayout from "../components/ConditionalLayout";
 
 export const metadata = {
   title: "Fresh Sabji Hub - Fresh Vegetables & Groceries Delivered",
@@ -14,13 +12,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <Providers>
-          <div className={styles.mainContainer}>
-            <Navbar />
-            <main className={styles.contentContainer}>
-              {children}
-            </main>
-            <Footer />
-          </div>
+          <ConditionalLayout>
+            {children}
+          </ConditionalLayout>
         </Providers>
       </body>
     </html>

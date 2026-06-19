@@ -1,0 +1,210 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  padding-bottom: 32px;
+}
+
+/* Header styled like app but premium web style */
+.header {
+  background: linear-gradient(135deg, #15803d, #16a34a);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  color: #ffffff;
+  position: relative;
+}
+
+.backButton {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 16px;
+}
+
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateX(-2px);
+}
+
+.headerTitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.scrollContainer {
+  padding-bottom: 32px;
+}
+
+.trustBanner {
+  margin: 24px;
+  background-color: #e8fbeb;
+  border: 1px solid #d1fae5;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.trustIconContainer {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #d1fae5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.trustContent {
+  flex: 1;
+}
+
+.trustTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: 4px;
+}
+
+.trustText {
+  font-size: 13px;
+  color: #065f46;
+  line-height: 1.5;
+}
+
+.introContainer {
+  padding: 0 24px;
+  margin-bottom: 16px;
+}
+
+.heading {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+}
+
+.date {
+  font-size: 13.5px;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.cardsContainer {
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.policyCard {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+
+.policyCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+  border-color: #cbd5e1;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  color: #16a34a;
+}
+
+.cardTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-left: 12px;
+}
+
+.cardBody {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.bulletList {
+  margin-top: 10px;
+  padding-left: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bulletItem {
+  font-size: 13.5px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.emailLinkButton {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 16px;
+  background-color: #e8fbeb;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.emailLinkButton:hover {
+  background-color: #d1fae5;
+  transform: translateY(-1px);
+}
+
+.emailLinkText {
+  font-size: 13.5px;
+  color: #16a34a;
+  font-weight: 700;
+  margin-left: 8px;
+}
+
+@media (max-width: 640px) {
+  .container {
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+@media (min-width: 1025px) {
+  .header {
+    display: none;
+  }
+  .container {
+    max-width: 800px;
+    margin: 40px auto;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+    border: 1px solid #f1f5f9;
+    padding-bottom: 48px;
+  }
+}

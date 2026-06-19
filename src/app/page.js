@@ -2,24 +2,50 @@
 
 import React, { useContext } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import ProductCard from '../components/ProductCard';
 import BannerCarousel from '../components/BannerCarousel';
+import SafeImage from '../components/SafeImage';
 import { AuthContext } from '../context/AuthContext';
-import { MOCK_BANNERS, MOCK_CATEGORIES, MOCK_PRODUCTS } from './data';
+import { api } from '../services/api';
 import styles from './page.module.css';
 
 export default function Home() {
   const router = useRouter();
-  const { activeAddress, serviceAvailable } = useContext(AuthContext);
+  const { activeAddress, activeShop, serviceAvailable } = useContext(AuthContext);
 
-  const homeTopBanners = MOCK_BANNERS.filter((b) => b.location === 'home_top');
-  const homeMiddleBanners = MOCK_BANNERS.filter((b) => b.location === 'home_middle');
+  const { data: banners = [], isLoading: isLoadingBanners } = useQuery({
+    queryKey: ['banners'],
+    queryFn: api.getBanners,
+    enabled: !!activeAddress && !!serviceAvailable,
+  });
+
+  const homeTopBanners = banners.filter(
+    (b) => b.location === 'home_top' || b.location === 'hometop'
+  );
+  const homeMiddleBanners = banners.filter(
+    (b) => b.location === 'home_middle' || b.location === 'homemiddle'
+  );
+
+  const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
+    queryKey: ['categories', activeShop?.id],
+    queryFn: () => api.getCategories(activeShop?.id),
+    enabled: !!activeAddress && !!serviceAvailable && !!activeShop?.id,
+  });
+
+  const { data: productsData, isLoading: isLoadingProducts } = useQuery({
+    queryKey: ['homeAllProducts', activeShop?.id],
+    queryFn: () => api.getProducts({ shopId: activeShop?.id, limit: 100 }),
+    enabled: !!activeAddress && !!serviceAvailable && !!activeShop?.id,
+  });
+
+  const allProducts = productsData?.products || [];
 
   // Group products by category for horizontal listing
-  const categoriesWithProducts = MOCK_CATEGORIES.map((cat) => {
-    const products = MOCK_PRODUCTS.filter((p) => p.categoryId === cat.id);
+  const categoriesWithProducts = categories.map((cat) => {
+    const products = allProducts.filter((p) => String(p.categoryId) === String(cat.id));
     return { ...cat, products };
-  }).filter((cat) => cat.products.length > 0);
+  }).filter((cat) => cat.products.length > 0).slice(0, 5);
 
   if (!activeAddress) {
     return (
@@ -45,6 +71,18 @@ export default function Home() {
     );
   }
 
+  const isScreenLoading = isLoadingBanners || isLoadingCategories || isLoadingProducts;
+
+  if (isScreenLoading) {
+    return (
+      <div className={styles.emptyStateContainer}>
+        <div className={styles.loaderSpinner} />
+        <h2 className={styles.emptyStateTitle}>Loading Fresh Sabji...</h2>
+        <p className={styles.emptyStateText}>Fetching catalog items from server...</p>
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Banner Slide Carousel */}
@@ -63,7 +101,7 @@ export default function Home() {
       </div>
 
       <div className={styles.categoriesGrid}>
-        {MOCK_CATEGORIES.slice(0, 5).map((cat) => (
+        {categories.slice(0, 5).map((cat) => (
           <div
             key={cat.id}
             className={styles.categoryCircleCard}
@@ -72,8 +110,7 @@ export default function Home() {
             }}
           >
             <div className={styles.categoryImageContainer}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <SafeImage
                 src={cat.image}
                 alt={cat.name}
                 className={styles.categoryCircleImage}

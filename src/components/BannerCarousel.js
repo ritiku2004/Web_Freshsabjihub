@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import SafeImage from './SafeImage';
 import styles from './BannerCarousel.module.css';
 
 export default function BannerCarousel({ banners = [] }) {
@@ -51,8 +52,7 @@ export default function BannerCarousel({ banners = [] }) {
                 <button className={styles.shopNowBtn}>Shop Now</button>
               </div>
               <div className={styles.bannerRight}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <SafeImage
                   src={banner.image}
                   alt={banner.title}
                   className={styles.bannerImage}

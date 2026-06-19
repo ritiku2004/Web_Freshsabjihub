@@ -3,6 +3,7 @@
 import React, { useContext } from 'react';
 import { Clock, Plus, Minus } from 'lucide-react';
 import { CartContext } from '../context/CartContext';
+import SafeImage from './SafeImage';
 import styles from './ProductCard.module.css';
 
 export default function ProductCard({ product }) {
@@ -39,9 +40,8 @@ export default function ProductCard({ product }) {
     <div className={`${styles.card} ${isOutOfStock ? styles.outOfStockCard : ''}`}>
       {/* Product Image Section */}
       <div className={styles.imageContainer}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={image || "/placeholder-veg.png"}
+        <SafeImage
+          src={image}
           alt={name}
           className={styles.image}
         />

@@ -3,14 +3,17 @@
 import React, { useState, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShoppingBag, Trash2, MapPin, AlertTriangle, CheckCircle, Sparkles, ArrowRight, ChevronRight } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { AuthContext } from '../../context/AuthContext';
 import { CartContext } from '../../context/CartContext';
+import SafeImage from '../../components/SafeImage';
+import { api } from '../../services/api';
 import { MOCK_CATEGORIES } from '../data';
 import styles from '../page.module.css';
 
 export default function CartPage() {
   const router = useRouter();
-  const { activeAddress, serviceAvailable } = useContext(AuthContext);
+  const { activeAddress, serviceAvailable, activeShop } = useContext(AuthContext);
   const {
     cartItems,
     cartSubtotal,
@@ -23,6 +26,12 @@ export default function CartPage() {
     updateQuantity,
     clearCart
   } = useContext(CartContext);
+
+  const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
+    queryKey: ['categories', activeShop?.id],
+    queryFn: () => api.getCategories(activeShop?.id),
+    enabled: !!activeAddress && !!serviceAvailable && !!activeShop?.id,
+  });
 
   const [driverTip, setDriverTip] = useState(0);
   const [isCustomTipOpen, setIsCustomTipOpen] = useState(false);
@@ -152,23 +161,31 @@ export default function CartPage() {
           </div>
 
           <div className={styles.popularCategoriesRow}>
-            {MOCK_CATEGORIES.map((cat) => (
-              <div
-                key={cat.id}
-                className={styles.popularCategoryCard}
-                onClick={() => router.push(`/categories?cat=${cat.id}`)}
-              >
-                <div className={styles.popularCategoryCircle}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={cat.image}
-                    alt={cat.name}
-                    className={styles.popularCategoryImage}
-                  />
+            {isLoadingCategories ? (
+              Array.from({ length: 5 }).map((_, idx) => (
+                <div key={`loader-${idx}`} className={styles.popularCategoryCard} style={{ opacity: 0.6 }}>
+                  <div className={styles.popularCategoryCircle} style={{ background: '#e5e7eb', animation: 'pulse 1.5s infinite' }}></div>
+                  <div style={{ height: '10px', width: '60px', background: '#e5e7eb', marginTop: '8px', borderRadius: '4px', animation: 'pulse 1.5s infinite', marginInline: 'auto' }}></div>
                 </div>
-                <span className={styles.popularCategoryName}>{cat.name}</span>
-              </div>
-            ))}
+              ))
+            ) : (
+              (categories.length > 0 ? categories : MOCK_CATEGORIES).map((cat) => (
+                <div
+                  key={cat.id}
+                  className={styles.popularCategoryCard}
+                  onClick={() => router.push(`/categories?cat=${cat.id}`)}
+                >
+                  <div className={styles.popularCategoryCircle}>
+                    <SafeImage
+                      src={cat.image}
+                      alt={cat.name}
+                      className={styles.popularCategoryImage}
+                    />
+                  </div>
+                  <span className={styles.popularCategoryName}>{cat.name}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       ) : (
@@ -178,8 +195,7 @@ export default function CartPage() {
             {cartItems.map((item) => (
               <div key={item.id} className={styles.cartItemRow}>
                 <div className={styles.cartItemLeft}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <SafeImage
                     src={item.image}
                     alt={item.name}
                     className={item.image ? styles.cartItemImage : ''}
