@@ -94,20 +94,22 @@ function CategoriesContent() {
 
           {/* All Categories Grid */}
           <div className={styles.categoriesGrid}>
-            {categories.map((cat) => (
+            {categories.map((cat, idx) => (
               <div
                 key={cat.id}
-                className={styles.categoryCircleCard}
+                className={styles.categoryCard}
                 onClick={() => setSelectedCategoryId(cat.id)}
+                style={{ animationDelay: `${idx * 60}ms` }}
               >
-                <div className={styles.categoryImageContainer}>
+                <div className={styles.categoryImageWrap}>
                   <SafeImage
                     src={cat.image}
                     alt={cat.name}
-                    className={styles.categoryCircleImage}
+                    className={styles.categoryImage}
                   />
+                  <div className={styles.categoryImageGlow} />
                 </div>
-                <span className={styles.categoryCircleName}>{cat.name}</span>
+                <span className={styles.categoryName}>{cat.name}</span>
               </div>
             ))}
           </div>

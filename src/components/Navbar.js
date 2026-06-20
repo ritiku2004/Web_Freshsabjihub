@@ -38,22 +38,25 @@ export default function Navbar({
       <header className={styles.header}>
         <div className={styles.headerContainer}>
           
-          {/* Left Section: Logo & Delivery Info */}
+          {/* Left Section: Logo */}
           <div className={styles.leftSection}>
             <div className={styles.logo} onClick={() => router.push('/')}>
               <span className={styles.leafIcon}>🌿</span>
               <span className={styles.brandName}>Fresh Sabji Hub</span>
             </div>
+          </div>
 
-            <div className={styles.deliverySelector} onClick={() => setIsLocationOpen(true)}>
-              <span className={styles.deliverLabel}>Deliver in</span>
+          {/* Center Left Section: Refined Delivery Info */}
+          <div className={styles.deliverySection} onClick={() => setIsLocationOpen(true)}>
+            <div className={styles.etaBadge}>
+              <span className={styles.deliverLabel}>DELIVER IN</span>
               <span className={styles.etaText}>
-                {serviceAvailable ? (deliveryETA ? `${deliveryETA} mins` : '---') : 'Out of Zone'}
+                {serviceAvailable ? (deliveryETA ? `${deliveryETA} MINS` : '---') : 'Out of Zone'}
               </span>
-              <div className={styles.addressRow}>
-                <span className={styles.addressText}>{formatAddress(activeAddress)}</span>
-                <ChevronDown size={14} className={styles.chevron} />
-              </div>
+            </div>
+            <div className={styles.addressBox}>
+              <span className={styles.addressText}>{formatAddress(activeAddress)}</span>
+              <ChevronDown size={14} className={styles.chevron} />
             </div>
           </div>
 
@@ -71,27 +74,24 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Right Section: Utility Actions */}
+          {/* Right Section: Profile */}
           <div className={styles.rightSection}>
-            <div className={styles.utilityActions}>
-              <button className={styles.actionBtn}>
-                <div className={styles.bellWrapper}>
-                  <Bell size={18} />
-                  <span className={styles.bellBadge}>2</span>
-                </div>
-              </button>
-
-              <button 
-                className={`${styles.actionBtn} ${styles.profileBtn}`}
-                onClick={() => router.push(isAuthenticated ? '/profile' : '/login')}
-              >
-                <User size={18} />
-              </button>
-            </div>
+            <button 
+              className={`${styles.actionBtn} ${styles.profileBtn}`}
+              onClick={() => router.push(isAuthenticated ? '/profile' : '/login')}
+            >
+              <User size={18} />
+              <span className={styles.profileText}>{isAuthenticated ? 'Profile' : 'Login'}</span>
+            </button>
           </div>
 
         </div>
       </header>
+
+      {/* Handle dynamic Categories header toggle on mobile */}
+      <div className={`${styles.categoriesHeaderMobile}`}>
+        <h1 className={styles.headerTitle}>{categoryTitle}</h1>
+      </div>
 
       {/* Sticky Bottom Tab Bar for Mobile Viewports */}
       <div className={styles.bottomTabBar}>

@@ -1,26 +1,39 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import SafeImage from './SafeImage';
 import styles from './BannerCarousel.module.css';
 
 export default function BannerCarousel({ banners = [] }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    if (banners.length <= 1) return;
+    if (banners.length <= 1 || isPaused) return;
 
     const timer = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % banners.length);
-    }, 4000);
+    }, 4500);
 
     return () => clearInterval(timer);
+  }, [banners.length, isPaused]);
+
+  const goTo = useCallback((dir) => {
+    setActiveIndex((prev) => {
+      if (dir === 'next') return (prev + 1) % banners.length;
+      return prev === 0 ? banners.length - 1 : prev - 1;
+    });
   }, [banners.length]);
 
   if (!banners || banners.length === 0) return null;
 
   return (
-    <div className={styles.carouselContainer}>
+    <div
+      className={styles.carouselContainer}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       <div
         className={styles.slidesWrapper}
         style={{ transform: `translateX(-${activeIndex * 100}%)` }}
@@ -28,13 +41,21 @@ export default function BannerCarousel({ banners = [] }) {
         {banners.map((banner, index) => {
           const bg = banner.backgroundColor || '#E8F5E9';
           const textCol = banner.textColor || '#2E7D32';
+          const resolvedImage = banner.image ? (banner.image.startsWith('/') && !banner.image.startsWith('//') ? (banner.image.startsWith('/uploads/') ? `https://api.freshsabjihub.com${banner.image}` : banner.image) : (banner.image.startsWith('uploads/') ? `https://api.freshsabjihub.com/${banner.image}` : banner.image)) : '';
 
           return (
             <div
               key={banner.id || index}
               className={styles.slide}
-              style={{ backgroundColor: bg, color: textCol }}
+              style={{ 
+                backgroundColor: bg,
+                backgroundImage: resolvedImage ? `url(${resolvedImage})` : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+              }}
             >
+              <div className={styles.slideGradient} />
               <div className={styles.bannerLeft}>
                 {banner.subtitle && (
                   <span className={styles.subtitle} style={{ color: textCol }}>
@@ -51,18 +72,32 @@ export default function BannerCarousel({ banners = [] }) {
                 )}
                 <button className={styles.shopNowBtn}>Shop Now</button>
               </div>
-              <div className={styles.bannerRight}>
-                <SafeImage
-                  src={banner.image}
-                  alt={banner.title}
-                  className={styles.bannerImage}
-                />
-              </div>
             </div>
           );
         })}
       </div>
 
+      {/* Navigation Arrows */}
+      {banners.length > 1 && (
+        <>
+          <button
+            className={`${styles.navArrow} ${styles.navPrev}`}
+            onClick={() => goTo('prev')}
+            aria-label="Previous slide"
+          >
+            <ChevronLeft size={20} strokeWidth={2.5} />
+          </button>
+          <button
+            className={`${styles.navArrow} ${styles.navNext}`}
+            onClick={() => goTo('next')}
+            aria-label="Next slide"
+          >
+            <ChevronRight size={20} strokeWidth={2.5} />
+          </button>
+        </>
+      )}
+
+      {/* Indicator Dots */}
       {banners.length > 1 && (
         <div className={styles.indicatorRow}>
           {banners.map((_, index) => (

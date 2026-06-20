@@ -47,56 +47,67 @@
   color: white;
 }
 
-.deliverySelector {
+.deliverySection {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 12px;
   cursor: pointer;
   background: rgba(255, 255, 255, 0.15);
   padding: 6px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.2s;
-  max-width: 260px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  transition: all 0.2s ease;
+  max-width: 320px;
 }
 
-.deliverySelector:hover {
+.deliverySection:hover {
   background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.etaBadge {
+  display: flex;
+  flex-direction: column;
+  border-right: 1.5px solid rgba(255, 255, 255, 0.3);
+  padding-right: 12px;
+  flex-shrink: 0;
 }
 
 .deliverLabel {
-  font-size: 9px;
-  font-weight: 800;
+  font-size: 8px;
+  font-weight: 850;
   text-transform: uppercase;
-  color: #dcfce7;
-  letter-spacing: 0.5px;
+  color: #bbf7d0;
+  letter-spacing: 0.8px;
 }
 
 .etaText {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 900;
   color: white;
   line-height: 1.2;
 }
 
-.addressRow {
+.addressBox {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 2px;
+  gap: 6px;
+  min-width: 0;
 }
 
 .addressText {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   color: white;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 180px;
+  max-width: 140px;
 }
 
 .chevron {
-  color: #dcfce7;
+  color: #bbf7d0;
+  flex-shrink: 0;
 }
 
 .searchSection {
@@ -244,9 +255,23 @@
   background: rgba(255, 255, 255, 0.25);
 }
 
-.profileBtn {
+.profileBtn, .cartNavBtn {
   background: white !important;
   color: #16a34a !important;
+  border-radius: 20px !important;
+  width: auto !important;
+  height: 38px !important;
+  padding: 0 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-weight: 750 !important;
+  font-size: 13px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.profileText, .cartNavText {
+  color: #16a34a;
 }
 
 .bellWrapper {
@@ -330,43 +355,60 @@
 @media (max-width: 768px) {
   .header {
     height: auto;
-    padding: 16px;
+    padding: 10px 14px;
   }
   .headerContainer {
     display: grid;
     grid-template-areas: 
-      "left right"
+      "address profile"
       "search search";
     grid-template-columns: 1fr auto;
-    gap: 12px;
+    gap: 12px 8px;
   }
   .leftSection {
-    grid-area: left;
-    gap: 0;
+    display: none;
   }
   .logo {
     display: none;
   }
-  .deliverySelector {
+  .deliverySection {
+    grid-area: address;
     background: transparent;
     border: none;
     padding: 0;
     max-width: 100%;
+    gap: 4px;
+    align-items: flex-start;
+    flex-direction: column-reverse;
+  }
+  .etaBadge {
+    border-right: none;
+    padding-right: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 4px;
   }
   .deliverLabel {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 800;
-    color: #dcfce7;
+    color: #bbf7d0;
   }
   .etaText {
-    font-size: 22px;
+    font-size: 13px;
     font-weight: 900;
-    margin: 2px 0;
+    margin: 0;
+  }
+  .addressBox {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: -2px;
   }
   .addressText {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 700;
-    max-width: 180px;
+    max-width: 220px;
   }
   .searchSection {
     grid-area: search;
@@ -374,11 +416,12 @@
     width: 100%;
   }
   .searchBar {
-    height: 48px;
-    border-radius: 10px;
+    height: 38px;
+    border-radius: 8px;
+    padding: 0 10px;
   }
   .rightSection {
-    grid-area: right;
+    grid-area: profile;
     display: flex !important;
     gap: 0;
     align-items: center;
@@ -386,13 +429,14 @@
   .desktopNav, .iconSeparator {
     display: none !important;
   }
-  .utilityActions {
-    gap: 10px;
+  .profileText, .cartNavText {
+    display: none !important;
   }
-  .actionBtn {
-    background: rgba(255, 255, 255, 0.2);
-    width: 38px;
-    height: 38px;
+  .profileBtn, .cartNavBtn {
+    border-radius: 50% !important;
+    width: 38px !important;
+    padding: 0 !important;
+    justify-content: center !important;
   }
   .bottomTabBar {
     display: flex;
@@ -428,19 +472,6 @@
 }
 
 .backBtn {
-  background: transparent;
-  border: none;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border-radius: 50%;
-  transition: background-color 0.2s;
-}
-
-.backBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  display: none !important;
 }
 

@@ -1,14 +1,106 @@
 "use client";
 
-import React, { useContext } from 'react';
+import React, { useContext, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { ChevronLeft, ChevronRight, ArrowRight, MapPin, AlertTriangle, Truck, Sparkles } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import BannerCarousel from '../components/BannerCarousel';
 import SafeImage from '../components/SafeImage';
 import { AuthContext } from '../context/AuthContext';
 import { api } from '../services/api';
 import styles from './page.module.css';
+
+function CategoryScrollArrows({ scrollRef }) {
+  const scroll = useCallback((dir) => {
+    if (!scrollRef.current) return;
+    const amount = dir === 'left' ? -320 : 320;
+    scrollRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+  }, [scrollRef]);
+
+  return (
+    <div className={styles.scrollArrows}>
+      <button className={styles.scrollArrowBtn} onClick={() => scroll('left')} aria-label="Scroll left">
+        <ChevronLeft size={18} strokeWidth={2.5} />
+      </button>
+      <button className={styles.scrollArrowBtn} onClick={() => scroll('right')} aria-label="Scroll right">
+        <ChevronRight size={18} strokeWidth={2.5} />
+      </button>
+    </div>
+  );
+}
+
+function ProductRow({ cat, router, index }) {
+  const scrollRef = useRef(null);
+
+  return (
+    <section className={styles.productSection} key={cat.id}>
+      <div className={styles.sectionHeader}>
+        <div className={styles.sectionTitleGroup}>
+          <h2 className={styles.sectionTitle}>{cat.name}</h2>
+        </div>
+        <div className={styles.sectionActions}>
+          <CategoryScrollArrows scrollRef={scrollRef} />
+          <button
+            className={styles.viewAllBtn}
+            onClick={() => router.push(`/categories?cat=${cat.id}`)}
+          >
+            View All <ArrowRight size={14} strokeWidth={2.5} />
+          </button>
+        </div>
+      </div>
+
+      <div className={styles.productsTrack} ref={scrollRef}>
+        {cat.products.map((prod) => (
+          <div key={prod.id} className={styles.productSlide}>
+            <ProductCard product={prod} />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function SkeletonLoader() {
+  return (
+    <div className={styles.skeletonContainer}>
+      {/* Banner skeleton */}
+      <div className={styles.skeletonBanner} />
+
+      {/* Category skeleton */}
+      <div className={styles.skeletonSectionHeader}>
+        <div className={styles.skeletonTitle} />
+        <div className={styles.skeletonBtn} />
+      </div>
+      <div className={styles.skeletonCategoryRow}>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className={styles.skeletonCategoryItem}>
+            <div className={styles.skeletonCircle} />
+            <div className={styles.skeletonTextSmall} />
+          </div>
+        ))}
+      </div>
+
+      {/* Products skeleton */}
+      <div className={styles.skeletonSectionHeader}>
+        <div className={styles.skeletonTitle} />
+        <div className={styles.skeletonBtn} />
+      </div>
+      <div className={styles.skeletonProductRow}>
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className={styles.skeletonProductCard}>
+            <div className={styles.skeletonProductImage} />
+            <div className={styles.skeletonProductInfo}>
+              <div className={styles.skeletonTextSmall} />
+              <div className={styles.skeletonTextMedium} />
+              <div className={styles.skeletonTextSmall} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   const router = useRouter();
@@ -47,10 +139,13 @@ export default function Home() {
     return { ...cat, products };
   }).filter((cat) => cat.products.length > 0).slice(0, 5);
 
+  // ─── Empty States ─────────────────────────────────────────
   if (!activeAddress) {
     return (
       <div className={styles.emptyStateContainer}>
-        <span style={{ fontSize: '48px' }}>📍</span>
+        <div className={styles.emptyStateIconWrap}>
+          <MapPin size={32} strokeWidth={1.8} />
+        </div>
         <h2 className={styles.emptyStateTitle}>Choose Delivery Location</h2>
         <p className={styles.emptyStateText}>
           Please select a saved address or enter a valid zipcode to check serviceability and browse products.
@@ -62,7 +157,9 @@ export default function Home() {
   if (!serviceAvailable) {
     return (
       <div className={styles.emptyStateContainer}>
-        <span style={{ fontSize: '48px' }}>⚠️</span>
+        <div className={`${styles.emptyStateIconWrap} ${styles.warningIcon}`}>
+          <AlertTriangle size={32} strokeWidth={1.8} />
+        </div>
         <h2 className={styles.emptyStateTitle}>No Service Available</h2>
         <p className={styles.emptyStateText}>
           We do not deliver to zipcode <strong>{activeAddress.zipcode}</strong>. We currently support select zipcodes of Noida and New Delhi (e.g. 10001 or 110070).
@@ -74,83 +171,69 @@ export default function Home() {
   const isScreenLoading = isLoadingBanners || isLoadingCategories || isLoadingProducts;
 
   if (isScreenLoading) {
-    return (
-      <div className={styles.emptyStateContainer}>
-        <div className={styles.loaderSpinner} />
-        <h2 className={styles.emptyStateTitle}>Loading Fresh Sabji...</h2>
-        <p className={styles.emptyStateText}>Fetching catalog items from server...</p>
-      </div>
-    );
+    return <SkeletonLoader />;
   }
 
   return (
-    <div>
-      {/* Banner Slide Carousel */}
+    <div className={styles.homePage}>
+
+      {/* ─── Hero Banner Carousel ────────────────────────────── */}
       {homeTopBanners.length > 0 && (
-        <div className={styles.bannersSection}>
+        <section className={styles.heroBannerSection}>
           <BannerCarousel banners={homeTopBanners} />
-        </div>
+        </section>
       )}
 
-      {/* Shop by Category circular grid */}
-      <div className={styles.sectionHeader}>
-        <h3 className={styles.sectionTitle}>Shop by Category</h3>
-        <button className={styles.seeAllText} onClick={() => router.push('/categories')}>
-          See All
-        </button>
-      </div>
-
-      <div className={styles.categoriesGrid}>
-        {categories.slice(0, 5).map((cat) => (
-          <div
-            key={cat.id}
-            className={styles.categoryCircleCard}
-            onClick={() => {
-              router.push(`/categories?cat=${cat.id}`);
-            }}
-          >
-            <div className={styles.categoryImageContainer}>
-              <SafeImage
-                src={cat.image}
-                alt={cat.name}
-                className={styles.categoryCircleImage}
-              />
-            </div>
-            <span className={styles.categoryCircleName}>{cat.name}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Category Products Scrollers */}
-      {categoriesWithProducts.map((cat, index) => (
-        <div key={cat.id} className={styles.productsRow}>
+      {/* ─── Shop by Category ────────────────────────────────── */}
+      {categories.length > 0 && (
+        <section className={styles.categorySection}>
           <div className={styles.sectionHeader}>
-            <h3 className={styles.sectionTitle}>{cat.name}</h3>
+            <div className={styles.sectionTitleGroup}>
+              <h2 className={styles.sectionTitle}>Shop by Category</h2>
+            </div>
             <button
-              className={styles.seeAllText}
-              onClick={() => {
-                router.push(`/categories?cat=${cat.id}`);
-              }}
+              className={styles.viewAllBtn}
+              onClick={() => router.push('/categories')}
             >
-              See All
+              See All <ArrowRight size={14} strokeWidth={2.5} />
             </button>
           </div>
 
-          <div className={styles.productsHorizontalScroll}>
-            {cat.products.map((prod) => (
-              <div key={prod.id} className={styles.horizontalCardWrapper}>
-                <ProductCard product={prod} />
+          <div className={styles.categoriesGrid}>
+            {categories.slice(0, 10).map((cat, idx) => (
+              <div
+                key={cat.id}
+                className={styles.categoryCard}
+                onClick={() => router.push(`/categories?cat=${cat.id}`)}
+                style={{ animationDelay: `${idx * 60}ms` }}
+              >
+                <div className={styles.categoryImageWrap}>
+                  <SafeImage
+                    src={cat.image}
+                    alt={cat.name}
+                    className={styles.categoryImage}
+                  />
+                  <div className={styles.categoryImageGlow} />
+                </div>
+                <span className={styles.categoryName}>{cat.name}</span>
               </div>
             ))}
           </div>
+        </section>
+      )}
 
-          {/* Middle Promotions Banner */}
+      {/* ─── Category Product Rows ───────────────────────────── */}
+      {categoriesWithProducts.map((cat, index) => (
+        <React.Fragment key={cat.id}>
+          <ProductRow cat={cat} router={router} index={index} />
+
+          {/* Middle Promotions Banner after 2nd category */}
           {index === 1 && homeMiddleBanners.length > 0 && (
-            <div className={styles.bannersSection} style={{ marginTop: '24px' }}>
+            <section className={styles.middleBannerSection}>
               <BannerCarousel banners={homeMiddleBanners} />
-            </div>
+            </section>
           )}
-        </div>
+        </React.Fragment>
       ))}
     </div>
   );
