@@ -1,5 +1,8 @@
 export const getApiBaseUrl = () => {
   if (typeof window === 'undefined') {
+    if (process.env.NODE_ENV === 'production') {
+      return 'https://api.freshsabjihub.com/api/v1';
+    }
     return 'http://localhost:5000/api/v1';
   }
   const hostname = window.location.hostname;
