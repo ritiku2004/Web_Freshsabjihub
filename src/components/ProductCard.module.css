@@ -242,10 +242,11 @@
   color: #94a3b8;
 }
 
-/* ─── Responsive ─────────────────────────────────────── */
+/* --- Responsive --------------------------------------- */
 @media (max-width: 480px) {
   .card {
     border-radius: 12px;
+    height: 100%;
   }
 
   .imageContainer {

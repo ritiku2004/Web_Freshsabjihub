@@ -22,8 +22,8 @@ export default function Footer({ onTabChange }) {
             <div className={styles.linksSubGrid}>
               <div className={styles.linkColumn}>
                 <a href="#blog">Blog</a>
-                <a href="#privacy">Privacy</a>
-                <a href="#terms">Terms</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/terms">Terms</a>
                 <a href="#faqs">FAQs</a>
                 <a href="#security">Security</a>
                 <a href="#contact">Contact</a>

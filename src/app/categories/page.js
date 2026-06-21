@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, Suspense, useContext } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft, SlidersHorizontal } from 'lucide-react';
 import BannerCarousel from '../../components/BannerCarousel';
 import ProductCard from '../../components/ProductCard';
 import SafeImage from '../../components/SafeImage';
+import Loader from '../../components/Loader';
 import { AuthContext } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import styles from '../page.module.css';
@@ -13,12 +15,22 @@ import styles from '../page.module.css';
 function CategoriesContent() {
   const { activeAddress, activeShop, serviceAvailable } = useContext(AuthContext);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const catParam = searchParams.get('cat');
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
   useEffect(() => {
     setSelectedCategoryId(catParam);
   }, [catParam]);
+
+  const handleCategorySelect = (id) => {
+    if (id) {
+      router.push(`/categories?cat=${id}`);
+    } else {
+      router.push(`/categories`);
+    }
+    setSelectedCategoryId(id);
+  };
 
   const { data: banners = [] } = useQuery({
     queryKey: ['banners'],
@@ -71,13 +83,7 @@ function CategoriesContent() {
   const isScreenLoading = isLoadingCategories || (selectedCategoryId && isLoadingProducts);
 
   if (isScreenLoading) {
-    return (
-      <div className={styles.emptyStateContainer}>
-        <div className={styles.loaderSpinner} />
-        <h2 className={styles.emptyStateTitle}>Loading Categories...</h2>
-        <p className={styles.emptyStateText}>Fetching fresh products...</p>
-      </div>
-    );
+    return <Loader text="Fetching fresh products..." />;
   }
 
   return (
@@ -98,7 +104,7 @@ function CategoriesContent() {
               <div
                 key={cat.id}
                 className={styles.categoryCard}
-                onClick={() => setSelectedCategoryId(cat.id)}
+                onClick={() => handleCategorySelect(cat.id)}
                 style={{ animationDelay: `${idx * 60}ms` }}
               >
                 <div className={styles.categoryImageWrap}>
@@ -117,10 +123,27 @@ function CategoriesContent() {
       ) : (
         /* "Category Products" view */
         <div className={styles.categoryProductsContainer}>
+          {/* Custom mobile-only green category header */}
+          <div className={styles.customCategoryHeader}>
+            <button 
+              className={styles.headerBackBtn} 
+              onClick={() => handleCategorySelect(null)}
+              aria-label="Back"
+            >
+              <ArrowLeft size={22} />
+            </button>
+            <h1 className={styles.headerTitle}>
+              {categories.find((c) => c.id === selectedCategoryId)?.name || 'Products'}
+            </h1>
+            <button className={styles.headerFilterBtn} aria-label="Filters">
+              <SlidersHorizontal size={22} />
+            </button>
+          </div>
+
           {/* Breadcrumb back navigation button for Desktop */}
           <button 
             className={styles.backToCategoriesBtn} 
-            onClick={() => setSelectedCategoryId(null)}
+            onClick={() => handleCategorySelect(null)}
           >
             ← Back to All Categories
           </button>
@@ -131,7 +154,7 @@ function CategoriesContent() {
                 <button
                   key={cat.id}
                   className={`${styles.sidebarBtn} ${selectedCategoryId === cat.id ? styles.activeSidebarBtn : ''}`}
-                  onClick={() => setSelectedCategoryId(cat.id)}
+                  onClick={() => handleCategorySelect(cat.id)}
                 >
                   {cat.name}
                 </button>

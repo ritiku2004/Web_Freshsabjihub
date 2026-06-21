@@ -52,3 +52,17 @@ a {
   }
 }
 
+/* Product Page layout handling: hide web footer on mobile screens */
+@media (max-width: 767px) {
+  .product-page-layout .web-footer-wrapper {
+    display: none !important;
+  }
+  
+  .product-page-layout > main {
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+}
+
+

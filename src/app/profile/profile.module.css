@@ -1,65 +1,55 @@
 .profilePage {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #1e293b;
+}
+
+/* ----- Header ----- */
+.pageHeader {
+  background: #0f7643;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.backBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.pageTitle {
+  font-size: 19px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+}
+
+/* ----- Content Container ----- */
+.pageContent {
   max-width: 600px;
   margin: 0 auto;
-  padding: 24px 16px 100px;
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: 40px 16px 80px;
 }
 
-/* Profile Banner */
-.profileHeader {
-  background: linear-gradient(135deg, #10b981 0%, #059669 60%, #047857 100%);
-  border-radius: 20px;
-  padding: 28px 24px;
-  color: white;
-  margin-bottom: 20px;
-  box-shadow: 0 8px 24px -4px rgba(16, 185, 129, 0.25);
-  position: relative;
-  overflow: hidden;
-}
-
-.profileHeader::before {
-  content: '';
-  position: absolute;
-  top: -60%;
-  right: -25%;
-  width: 260px;
-  height: 260px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  pointer-events: none;
-}
-
-.profileHeader::after {
-  content: '';
-  position: absolute;
-  bottom: -40%;
-  left: -15%;
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  pointer-events: none;
-}
-
-.headerTitle {
-  font-size: 24px;
-  font-weight: 800;
-  margin: 0 0 4px;
-  letter-spacing: -0.5px;
-  position: relative;
-  z-index: 1;
-}
-
-.headerSubtitle {
-  font-size: 13px;
-  opacity: 0.85;
-  margin: 0;
-  font-weight: 500;
-  position: relative;
-  z-index: 1;
-}
-
-/* User Card */
+/* ----- User Card ----- */
 .profileCard {
   background: white;
   border-radius: 16px;
@@ -67,15 +57,9 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  margin-bottom: 16px;
-  border: 1px solid #f0f0f0;
-  position: relative;
-  transition: box-shadow 0.2s ease;
-}
-
-.profileCard:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  margin-bottom: 20px;
 }
 
 .avatarWrapper {
@@ -85,57 +69,52 @@
 }
 
 .avatarContainer {
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  background-color: #10b981;
+  background-color: #0f7643;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-weight: 800;
-  font-size: 20px;
+  font-weight: 700;
+  font-size: 24px;
   overflow: hidden;
-  transition: all 0.2s ease-in-out;
-  border: 3px solid white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
 .avatarContainerHovered {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transform: scale(1.03);
 }
 
 .avatarImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 0.2s ease;
 }
 
 .avatarEmoji {
-  font-size: 28px;
+  font-size: 32px;
 }
 
 .avatarText {
   color: white;
-  letter-spacing: 0.5px;
 }
 
 .cameraIconOverlay {
   position: absolute;
   bottom: -2px;
   right: -2px;
-  background: #10b981;
+  background: #0f7643;
   border: 2px solid white;
   border-radius: 50%;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .profileDetails {
@@ -146,63 +125,57 @@
 .detailsHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  gap: 12px;
 }
 
 .userName {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: #0f172a;
+  margin: 0 0 4px;
 }
 
 .userEmail {
-  font-size: 13px;
-  color: #6b7280;
+  font-size: 13.5px;
+  color: #64748b;
   margin: 0 0 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-all;
 }
 
 .userPhone {
-  font-size: 12px;
-  color: #9ca3af;
+  font-size: 12.5px;
+  color: #94a3b8;
   margin: 0;
 }
 
 .editProfileBtn {
-  background: #f0fdf4;
+  background: #e8f8f0;
   border: none;
-  border-radius: 10px;
+  border-radius: 50%;
   width: 36px;
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #10b981;
+  color: #0f7643;
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .editProfileBtn:hover {
-  background: #dcfce7;
-  color: #059669;
+  background: #d1fae5;
   transform: scale(1.05);
 }
 
-/* Menu Items */
+/* ----- Menu Options Container ----- */
 .menuContainer {
   background: white;
   border-radius: 16px;
-  padding: 4px 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  margin-bottom: 20px;
-  border: 1px solid #f0f0f0;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  margin-bottom: 24px;
   overflow: hidden;
 }
 
@@ -210,13 +183,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 15px 20px;
+  padding: 16px 20px;
   cursor: pointer;
   background: transparent;
   border: none;
   width: 100%;
-  border-bottom: 1px solid #f5f5f5;
-  transition: all 0.15s ease;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease;
   text-align: left;
 }
 
@@ -225,62 +198,56 @@
 }
 
 .menuItem:hover {
-  background: #f0fdf4;
-}
-
-.menuItem:active {
-  background: #dcfce7;
+  background: #f8fafc;
 }
 
 .menuItemLeft {
   display: flex;
   align-items: center;
   gap: 14px;
-  color: #10b981;
+  color: #0f7643;
 }
 
 .menuItemText {
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 600;
-  color: #374151;
+  color: #1e293b;
 }
 
 .chevronRight {
-  color: #d1d5db;
+  color: #94a3b8;
   transition: transform 0.15s ease;
 }
 
 .menuItem:hover .chevronRight {
-  color: #10b981;
   transform: translateX(2px);
+  color: #0f7643;
 }
 
-/* Action Button */
+/* ----- Logout Button ----- */
 .logoutButton {
   width: 100%;
-  background: white;
-  border: 1.5px solid #fca5a5;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
   color: #ef4444;
   padding: 14px;
   font-size: 15px;
   font-weight: 700;
-  border-radius: 14px;
+  border-radius: 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .logoutButton:hover {
-  background: #fef2f2;
-  border-color: #ef4444;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+  background: #fee2e2;
+  border-color: #fca5a5;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.05);
 }
 
-/* Modal Styling */
+/* ----- Modal Styling ----- */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -293,8 +260,7 @@
   justify-content: center;
   z-index: 1100;
   padding: 16px;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(4px);
 }
 
 .modalContainer {
@@ -305,42 +271,30 @@
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.15);
   overflow: hidden;
-  animation: modalSlide 0.3s ease-out;
-}
-
-@keyframes modalSlide {
-  from {
-    transform: translateY(20px) scale(0.98);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
 }
 
 .modalHeader {
-  padding: 20px 24px;
-  border-bottom: 1px solid #f3f4f6;
+  padding: 18px 24px;
+  border-bottom: 1px solid #f1f5f9;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .modalTitle {
-  font-size: 18px;
-  font-weight: 800;
-  color: #1f2937;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
   margin: 0;
 }
 
 .modalCloseBtn {
-  background: #f3f4f6;
+  background: #f1f5f9;
   border: none;
   cursor: pointer;
-  color: #6b7280;
+  color: #64748b;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -350,8 +304,8 @@
 }
 
 .modalCloseBtn:hover {
-  background: #e5e7eb;
-  color: #374151;
+  background: #e2e8f0;
+  color: #334155;
 }
 
 .modalScrollContent {
@@ -360,48 +314,41 @@
   flex: 1;
 }
 
-.modalBodyText {
-  font-size: 14px;
-  line-height: 1.7;
-  color: #4b5563;
-  white-space: pre-line;
-}
-
-/* Edit Profile Form */
+/* ----- Edit Profile Form ----- */
 .formGroup {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .formLabel {
   display: block;
   font-size: 13px;
-  font-weight: 700;
-  color: #374151;
+  font-weight: 600;
+  color: #475569;
   margin-bottom: 6px;
 }
 
 .formInput {
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid #d1d5db;
+  border: 1.5px solid #cbd5e1;
   border-radius: 10px;
   font-size: 14px;
-  color: #1f2937;
+  color: #0f172a;
+  background: #f8fafc;
+  outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
-  background: #fafafa;
 }
 
 .formInput:focus {
-  outline: none;
-  border-color: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  border-color: #0f7643;
+  box-shadow: 0 0 0 3px rgba(15, 118, 67, 0.08);
   background: #ffffff;
 }
 
 .avatarPickerLabel {
   font-size: 13px;
-  font-weight: 700;
-  color: #374151;
+  font-weight: 600;
+  color: #475569;
   margin: 20px 0 8px;
   display: block;
 }
@@ -428,20 +375,20 @@
 }
 
 .selectedAvatarOption {
-  border-color: #10b981;
-  transform: scale(1.1);
-  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+  border-color: #0f7643;
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(15, 118, 67, 0.15);
 }
 
 .avatarOptionNoneText {
   font-size: 11px;
   font-weight: bold;
-  color: #6b7280;
+  color: #64748b;
 }
 
 .modalFooter {
   padding: 16px 24px;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid #f1f5f9;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -449,19 +396,18 @@
 
 .cancelBtn {
   background: white;
-  border: 1px solid #d1d5db;
+  border: 1px solid #cbd5e1;
   border-radius: 10px;
   padding: 10px 20px;
   font-size: 14px;
   font-weight: 600;
-  color: #374151;
+  color: #475569;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .cancelBtn:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
+  background: #f8fafc;
 }
 
 .saveBtn {
@@ -473,52 +419,54 @@
   font-weight: 700;
   color: white;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
   transition: all 0.2s;
 }
 
 .saveBtn:hover {
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
 }
 
-/* Responsive */
+/* ----- Responsive ----- */
 @media (max-width: 480px) {
-  .profilePage {
-    padding: 16px 12px 90px;
+  .pageContent {
+    padding: 16px 12px 60px;
   }
-  .profileHeader {
-    border-radius: 16px;
-    padding: 24px 20px;
+
+  .pageHeader {
+    padding: 14px 16px;
   }
-  .headerTitle {
-    font-size: 22px;
-  }
+
   .profileCard {
     padding: 16px;
-    gap: 14px;
+    gap: 12px;
     border-radius: 14px;
   }
+
   .avatarContainer {
-    width: 52px;
-    height: 52px;
-    font-size: 18px;
+    width: 56px;
+    height: 56px;
+    font-size: 20px;
   }
+
   .userName {
     font-size: 15px;
   }
+
   .userEmail {
-    font-size: 12px;
+    font-size: 12.5px;
   }
+
   .menuItem {
     padding: 14px 16px;
   }
+
   .menuItemText {
-    font-size: 13px;
+    font-size: 13.5px;
   }
+
   .logoutButton {
     padding: 12px;
     font-size: 14px;
-    border-radius: 12px;
   }
 }

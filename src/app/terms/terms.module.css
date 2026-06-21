@@ -1,4 +1,4 @@
-.container {
+.termsPage {
   min-height: 100vh;
   background: #f8fafc;
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -6,7 +6,7 @@
 }
 
 /* ----- Header ----- */
-.header {
+.pageHeader {
   background: #0f7643;
   padding: 16px 20px;
   display: flex;
@@ -16,10 +16,9 @@
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  color: #ffffff;
 }
 
-.backButton {
+.backBtn {
   background: transparent;
   border: none;
   cursor: pointer;
@@ -32,27 +31,27 @@
   transition: background 0.2s;
 }
 
-.backButton:hover {
+.backBtn:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.headerTitle {
+.pageTitle {
   font-size: 19px;
   font-weight: 600;
   color: white;
   margin: 0;
 }
 
-/* ----- Scroll Container (Content Wrapper) ----- */
-.scrollContainer {
+/* ----- Content Container ----- */
+.pageContent {
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px 16px 80px;
   transition: max-width 0.3s ease;
 }
 
-/* ----- Trust Banner ----- */
-.trustBanner {
+/* ----- Summary Card ----- */
+.summaryCard {
   background-color: #e8f8f0;
   border: 1px solid #d1fae5;
   border-radius: 16px;
@@ -63,7 +62,7 @@
   margin-bottom: 24px;
 }
 
-.trustIconContainer {
+.summaryIconWrap {
   background: #ffffff;
   border-radius: 50%;
   width: 40px;
@@ -76,59 +75,59 @@
   flex-shrink: 0;
 }
 
-.trustContent {
+.summaryInfo {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.trustTitle {
+.summaryTitle {
   font-size: 15px;
   font-weight: 700;
   color: #064e3b;
   margin: 0;
 }
 
-.trustText {
+.summaryDesc {
   font-size: 13.5px;
   color: #065f46;
   line-height: 1.5;
   margin: 0;
 }
 
-/* ----- Intro Section ----- */
-.introContainer {
+/* ----- Heading Section ----- */
+.mainTitleSec {
   margin-bottom: 20px;
 }
 
-.heading {
+.mainTitle {
   font-size: 21px;
   font-weight: 700;
   color: #0f172a;
   margin: 0 0 6px 0;
 }
 
-.date {
+.effectiveDate {
   font-size: 13.5px;
   color: #64748b;
   margin: 0;
 }
 
-/* ----- Cards Container ----- */
-.cardsContainer {
+/* ----- Cards List ----- */
+.termsList {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
 }
 
 @media (min-width: 768px) {
-  .cardsContainer {
+  .termsList {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
 }
 
-.policyCard {
+.termCard {
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
@@ -143,7 +142,14 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.cardIconWrap {
   color: #0f7643;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .cardTitle {
@@ -153,74 +159,37 @@
   margin: 0;
 }
 
-.cardBody {
+.cardContent {
   font-size: 14px;
   color: #475569;
   line-height: 1.5;
   margin: 0;
 }
 
-.bulletList {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.bulletItem {
-  font-size: 13.5px;
-  color: #475569;
-  line-height: 1.5;
-}
-
-.emailLinkButton {
-  display: inline-flex;
-  align-items: center;
-  background-color: #e8f8f0;
-  padding: 8px 16px;
-  border-radius: 9999px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-  margin-top: 8px;
-  align-self: flex-start;
-}
-
-.emailLinkButton:hover {
-  background-color: #d1fae5;
-  transform: translateY(-1px);
-}
-
-.emailLinkText {
-  font-size: 13.5px;
-  color: #0f7643;
-  font-weight: 700;
-  margin-left: 8px;
-}
-
 /* ----- Responsive ----- */
 @media (max-width: 480px) {
-  .scrollContainer {
+  .pageContent {
     padding: 16px 12px 60px;
   }
   
-  .header {
+  .pageHeader {
     padding: 14px 16px;
   }
   
-  .headerTitle {
+  .pageTitle {
     font-size: 17px;
   }
   
-  .trustBanner {
+  .summaryCard {
     padding: 14px 16px;
     gap: 12px;
   }
 
-  .policyCard {
+  .termCard {
     padding: 16px;
   }
 
-  .heading {
+  .mainTitle {
     font-size: 19px;
   }
 }

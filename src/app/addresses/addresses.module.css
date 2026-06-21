@@ -4,7 +4,7 @@
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* ───── Header ───── */
+/* ----- Header ----- */
 .pageHeader {
   background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%);
   padding: 18px 20px;
@@ -43,14 +43,14 @@
   letter-spacing: -0.3px;
 }
 
-/* ───── Content ───── */
+/* ----- Content ----- */
 .pageContent {
   max-width: 600px;
   margin: 0 auto;
   padding: 20px 16px 100px;
 }
 
-/* ───── Section ───── */
+/* ----- Section ----- */
 .section {
   margin-bottom: 24px;
 }
@@ -62,7 +62,7 @@
   margin: 0 0 12px;
 }
 
-/* ───── Address Cards ───── */
+/* ----- Address Cards ----- */
 .addressList {
   display: flex;
   flex-direction: column;
@@ -182,7 +182,7 @@
   background: #fef2f2;
 }
 
-/* ───── Form Card ───── */
+/* ----- Form Card ----- */
 .formCard {
   background: white;
   border-radius: 16px;
@@ -191,7 +191,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-/* ───── Type Pills ───── */
+/* ----- Type Pills ----- */
 .typePillRow {
   display: flex;
   gap: 10px;
@@ -224,7 +224,7 @@
   font-weight: 700;
 }
 
-/* ───── Form Fields ───── */
+/* ----- Form Fields ----- */
 .formGroup {
   margin-bottom: 14px;
 }
@@ -252,7 +252,7 @@
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08);
 }
 
-/* ───── Map ───── */
+/* ----- Map ----- */
 .mapContainer {
   position: relative;
   margin-bottom: 18px;
@@ -291,7 +291,7 @@
   transform: translateY(-1px);
 }
 
-/* ───── Save Button ───── */
+/* ----- Save Button ----- */
 .saveBtn {
   width: 100%;
   padding: 15px;
@@ -319,7 +319,7 @@
   box-shadow: none;
 }
 
-/* ───── Responsive ───── */
+/* ----- Responsive ----- */
 @media (max-width: 480px) {
   .pageContent {
     padding: 16px 12px 90px;

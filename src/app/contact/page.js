@@ -113,7 +113,7 @@ export default function ContactPage() {
             onClick={handleWhatsApp}
           >
             <div className={styles.iconContainer} style={{ backgroundColor: '#E8FBEB' }}>
-              <MessageSquare size={22} color="#16a34a" />
+              <MessageSquare size={22} color="#0f7643" />
             </div>
             <div className={styles.contactDetails}>
               <div className={styles.cardHeaderRow}>
@@ -209,7 +209,7 @@ export default function ContactPage() {
                     <span className={`${styles.dropdownItemText} ${subject === item ? styles.selectedDropdownItemText : ''}`}>
                       {item}
                     </span>
-                    {subject === item && <Check size={16} color="#16a34a" />}
+                    {subject === item && <Check size={16} color="#0f7643" />}
                   </div>
                 ))}
               </div>

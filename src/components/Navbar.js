@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useContext, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Store, LayoutGrid, ShoppingCart, RotateCcw, User, Bell, ChevronDown, Search, Mic, ArrowLeft } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
@@ -15,6 +15,7 @@ export default function Navbar({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   
   let activeTab = 'home';
   if (pathname === '/cart') activeTab = 'cart';
@@ -32,10 +33,12 @@ export default function Navbar({
     return `${addr.type} - ${addr.flatNo}, ${addr.addressLine}`;
   };
 
+  const isCategoryDetailsPage = pathname.startsWith('/categories') && searchParams.get('cat');
+
   return (
     <>
       {/* Top Header for Desktop & Mobile */}
-      <header className={styles.header}>
+      <header className={`${styles.header} ${isCategoryDetailsPage ? styles.categoryDetailsHeader : ''}`}>
         <div className={styles.headerContainer}>
           
           {/* Left Section: Logo */}
@@ -47,7 +50,7 @@ export default function Navbar({
           </div>
 
           {/* Center Left Section: Refined Delivery Info */}
-          <div className={styles.deliverySection} onClick={() => setIsLocationOpen(true)}>
+          <div className={styles.deliverySection} onClick={() => router.push('/addresses')}>
             <div className={styles.etaBadge}>
               <span className={styles.deliverLabel}>DELIVER IN</span>
               <span className={styles.etaText}>
@@ -66,7 +69,7 @@ export default function Navbar({
               <Search size={18} className={styles.searchIcon} />
               <input
                 type="text"
-                placeholder='Search "atta"'
+                placeholder='Search "coke"'
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -74,8 +77,14 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Right Section: Profile */}
+          {/* Right Section: Profile & Notifications */}
           <div className={styles.rightSection}>
+            <div className={styles.bellWrapper}>
+              <button className={styles.bellBtn} onClick={() => router.push(isAuthenticated ? '/profile' : '/login')} aria-label="Notifications">
+                <Bell size={20} />
+                <span className={styles.bellBadge}>2</span>
+              </button>
+            </div>
             <button 
               className={`${styles.actionBtn} ${styles.profileBtn}`}
               onClick={() => router.push(isAuthenticated ? '/profile' : '/login')}
@@ -89,9 +98,11 @@ export default function Navbar({
       </header>
 
       {/* Handle dynamic Categories header toggle on mobile */}
-      <div className={`${styles.categoriesHeaderMobile}`}>
-        <h1 className={styles.headerTitle}>{categoryTitle}</h1>
-      </div>
+      {!isCategoryDetailsPage && (
+        <div className={`${styles.categoriesHeaderMobile}`}>
+          <h1 className={styles.headerTitle}>{categoryTitle}</h1>
+        </div>
+      )}
 
       {/* Sticky Bottom Tab Bar for Mobile Viewports */}
       <div className={styles.bottomTabBar}>
@@ -129,7 +140,7 @@ export default function Navbar({
 
         <button
           className={`${styles.tabItem} ${activeTab === 'orders' ? styles.activeTab : ''}`}
-          onClick={() => router.push('/orders')}
+          onClick={() => router.push(isAuthenticated ? '/orders' : '/login')}
         >
           <div className={styles.indicatorLine} />
           <RotateCcw size={20} />

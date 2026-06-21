@@ -6,16 +6,30 @@ import { ShoppingBag, MapPin, AlertTriangle, CheckCircle, Clock, Sparkles, Chevr
 import { AuthContext } from '../../context/AuthContext';
 import { CartContext } from '../../context/CartContext';
 import SafeImage from '../../components/SafeImage';
+import Loader from '../../components/Loader';
 import { MOCK_PRODUCTS, INITIAL_ORDERS } from '../data';
 import styles from '../page.module.css';
 
 export default function OrdersPage() {
   const router = useRouter();
-  const { activeAddress, serviceAvailable } = useContext(AuthContext);
+  const { activeAddress, serviceAvailable, isAuthenticated } = useContext(AuthContext);
   const { addToCart } = useContext(CartContext);
 
   const [pastOrders, setPastOrders] = useState([]);
   const [expandedOrderId, setExpandedOrderId] = useState(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      if (!storedToken || !storedUser) {
+        router.replace('/login');
+      } else {
+        setLoadingAuth(false);
+      }
+    }
+  }, [router]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -64,6 +78,10 @@ export default function OrdersPage() {
     const match = MOCK_PRODUCTS.find(p => p.id === productId);
     return match ? match.image : 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=150';
   };
+
+  if (loadingAuth) {
+    return <Loader text="Loading Orders..." />;
+  }
 
   if (!activeAddress) {
     return (
@@ -179,12 +197,12 @@ export default function OrdersPage() {
               <div className={styles.orderActionRow}>
                 <button 
                   className={styles.orderDetailsLinkBtn}
-                  onClick={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}
+                  onClick={() => router.push(`/orders/${order.id}`)}
                 >
                   <span>View Details</span>
                   <ChevronRight 
                     size={14} 
-                    className={`${styles.chevronIcon} ${expandedOrderId === order.id ? styles.chevronRotated : ''}`} 
+                    className={styles.chevronIcon} 
                   />
                 </button>
                 

@@ -130,7 +130,7 @@ export default function PrivacyPage() {
               onClick={handleEmailClick}
               className={styles.emailLinkButton}
             >
-              <Mail size={16} color="#16a34a" />
+              <Mail size={16} color="#0f7643" />
               <span className={styles.emailLinkText}>privacy@freshsabjihub.com</span>
             </button>
           </div>

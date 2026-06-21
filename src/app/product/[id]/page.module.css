@@ -1,0 +1,426 @@
+.wrapper {
+  max-width: 500px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  box-sizing: border-box;
+}
+
+.header {
+  background: linear-gradient(135deg, #15803d, #16a34a);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  color: #ffffff;
+}
+
+.backButton {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateX(-2px);
+}
+
+.headerTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.5px;
+}
+
+.shareButton {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.shareButton:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+/* Desktop-only back button (hidden on mobile) */
+.desktopBackContainer {
+  display: none;
+  margin-bottom: 20px;
+}
+
+.desktopBackBtn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s ease;
+}
+
+.desktopBackBtn:hover {
+  color: #0f7643;
+}
+
+.mainContentGrid {
+  display: flex;
+  flex-direction: column;
+}
+
+.imageSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.imageContainer {
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.detailsSection {
+  padding: 24px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+  line-height: 1.25;
+}
+
+.unit {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 16px 0;
+  font-weight: 600;
+}
+
+.price {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* Desktop-only actions (hidden on mobile) */
+.desktopActions {
+  display: none;
+  margin-top: 24px;
+}
+
+.detailsSection2 {
+  padding: 24px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.sectionHeading {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 10px 0;
+}
+
+.sectionContent {
+  font-size: 14px;
+  color: #475569;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.whyChooseSection {
+  padding: 24px 20px 120px 20px;
+}
+
+.whyChooseHeading {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+}
+
+.featuresList {
+  background-color: #f4fbf7;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border: 1px solid rgba(15, 118, 67, 0.05);
+}
+
+.featureItem {
+  display: flex;
+  gap: 16px;
+}
+
+.iconContainer {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #dcfce7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f7643;
+  flex-shrink: 0;
+}
+
+.featureTexts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.featureTitle {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.featureDesc {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.stickyFooter {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 500px;
+  background: #ffffff;
+  border-top: 1px solid #f1f5f9;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+
+.priceBlock {
+  display: flex;
+  flex-direction: column;
+}
+
+.priceLabel {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.footerPrice {
+  font-size: 20px;
+  font-weight: 850;
+  color: #0f172a;
+}
+
+.quantityWidget {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #0b7a39;
+  color: #ffffff;
+  border-radius: 8px;
+  width: 120px;
+  height: 40px;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.qtyButton {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+}
+
+.qtyButton:hover {
+  opacity: 0.8;
+}
+
+.qtyText {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.addButton {
+  background-color: #0b7a39;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 750;
+  font-size: 14px;
+  width: 120px;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.addButton:hover {
+  background-color: #0a6531;
+}
+
+.loadingWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  gap: 16px;
+  color: #0f7643;
+}
+
+/* =======================================================
+   LARGE SCREEN STYLES (Desktop / Tablet)
+   ======================================================= */
+@media (min-width: 768px) {
+  .wrapper {
+    max-width: 100%;
+    box-shadow: none;
+    background: #f8fafc;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  .header {
+    border-radius: 0;
+    margin-bottom: 0;
+    padding: 24px 32px;
+  }
+
+  .mainContentGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f1f5f9;
+    max-width: 1200px;
+    margin: 40px auto;
+  }
+
+  .imageSection {
+    border-bottom: none;
+    padding: 0;
+    justify-content: center;
+    background: #ffffff;
+  }
+
+  .imageContainer {
+    max-width: 450px;
+  }
+
+  .detailsSection {
+    padding: 0 0 24px 0;
+  }
+
+  .title {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+
+  .unit {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  .price {
+    font-size: 30px;
+  }
+
+  .desktopActions {
+    display: block;
+  }
+
+  .detailsSection2 {
+    padding: 24px 0;
+  }
+
+  .whyChooseSection {
+    padding: 24px 0 0 0;
+  }
+
+  .stickyFooter {
+    display: none !important;
+  }
+}

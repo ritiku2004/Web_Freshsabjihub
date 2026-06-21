@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useContext } from 'react';
+import { useRouter } from 'next/navigation';
 import { Clock, Plus, Minus } from 'lucide-react';
 import { CartContext } from '../context/CartContext';
 import SafeImage from './SafeImage';
 import styles from './ProductCard.module.css';
 
 export default function ProductCard({ product }) {
+  const router = useRouter();
   const { cartItems, addToCart, updateQuantity } = useContext(CartContext);
 
   const { id, name, price, discountPrice, unit, image, stock = 50 } = product;
@@ -37,7 +39,10 @@ export default function ProductCard({ product }) {
   };
 
   return (
-    <div className={`${styles.card} ${isOutOfStock ? styles.outOfStockCard : ''}`}>
+    <div 
+      className={`${styles.card} ${isOutOfStock ? styles.outOfStockCard : ''}`}
+      onClick={() => router.push(`/product/${id}`)}
+    >
       {/* Product Image Section */}
       <div className={styles.imageContainer}>
         <SafeImage

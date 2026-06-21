@@ -15,10 +15,12 @@ import {
   X,
   Edit2,
   Camera,
+  ArrowLeft,
 } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import SafeImage from '../../components/SafeImage';
+import Loader from '../../components/Loader';
 import styles from './profile.module.css';
 
 const API_BASE_URL = 'https://api.freshsabjihub.com/api/v1';
@@ -72,7 +74,7 @@ const PRESET_AVATARS = [
 export default function ProfilePage() {
   const router = useRouter();
   const fileInputRef = useRef(null);
-  const { user, logout, activeAddress, token, serviceAvailable, activeShop, isAuthenticated } = useContext(AuthContext);
+  const { user, logout, updateUser, activeAddress, token, serviceAvailable, activeShop, isAuthenticated, refreshProfile } = useContext(AuthContext);
 
   const [loadingAuth, setLoadingAuth] = useState(true);
 
@@ -84,9 +86,10 @@ export default function ProfilePage() {
         router.replace('/login');
       } else {
         setLoadingAuth(false);
+        refreshProfile();
       }
     }
-  }, [router]);
+  }, [router, refreshProfile]);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalDetails, setModalDetails] = useState({ title: '', content: '' });
@@ -142,40 +145,26 @@ export default function ProfilePage() {
     fileInputRef.current?.click();
   };
 
-  const handlePickImage = (e) => {
+  const handlePickImage = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append('avatar', file);
-
-    setIsUpdating(true);
-    fetch(`${API_BASE_URL}/user/auth/upload`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: formData
-    })
-    .then(res => {
-      if (!res.ok) throw new Error('Upload failed');
-      return res.json();
-    })
-    .then(data => {
-      if (data.success && data.data && data.data.url) {
-        setSelectedAvatar(data.data.url);
-        // Force state update for the user immediately if saving isn't needed
-      } else {
-        throw new Error(data.message || 'Upload failed');
-      }
-    })
-    .catch(err => {
+    try {
+      setIsUpdating(true);
+      const uploadedUrl = await api.uploadAvatar(file);
+      setSelectedAvatar(uploadedUrl);
+      
+      const newUserData = {
+        ...user,
+        profile_picture_url: uploadedUrl
+      };
+      updateUser(newUserData);
+    } catch (err) {
       console.error(err);
       alert('Failed to upload image. Please try again.');
-    })
-    .finally(() => {
+    } finally {
       setIsUpdating(false);
-    });
+    }
   };
 
   const handleUpdateProfile = async () => {
@@ -201,47 +190,22 @@ export default function ProfilePage() {
 
     try {
       setIsUpdating(true);
-      // Construct auth header since API helper doesn't share global token state in simplified web setup
-      const headers = {
-        'Content-Type': 'application/json',
+      const updatedUser = await api.updateProfile(
+        editName.trim(),
+        editEmail.trim() || null,
+        editPhone.trim() || null,
+        selectedAvatar || null
+      );
+
+      const newUserData = {
+        ...user,
+        ...updatedUser,
+        name: editName.trim(),
+        phone_number: editPhone.trim() || null,
+        profile_picture_url: selectedAvatar || null
       };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
 
-      const response = await fetch(`${API_BASE_URL}/user/auth/profile`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify({
-          name: editName.trim(),
-          email: editEmail.trim() || null,
-          phone_number: editPhone.trim() || null,
-          profile_picture_url: selectedAvatar || null
-        })
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.message || 'Failed to update profile');
-      }
-
-      const data = await response.json();
-      const updatedUser = data.data;
-
-      // Sync AuthContext profile
-      if (window && typeof window !== 'undefined') {
-        const localUser = JSON.parse(localStorage.getItem('user') || '{}');
-        const updatedLocal = {
-          ...localUser,
-          ...updatedUser,
-          name: editName.trim(),
-          phone_number: editPhone.trim() || null,
-          profile_picture_url: selectedAvatar || null
-        };
-        localStorage.setItem('user', JSON.stringify(updatedLocal));
-        window.location.reload(); // Reload to sync all contexts safely
-      }
-
+      updateUser(newUserData);
       setEditProfileVisible(false);
     } catch (e) {
       alert(e.message || 'Failed to update profile. Please try again.');
@@ -251,11 +215,7 @@ export default function ProfilePage() {
   };
 
   if (loadingAuth) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', fontFamily: 'sans-serif', color: '#10b981', fontWeight: 'bold' }}>
-        Loading...
-      </div>
-    );
+    return <Loader text="Loading Profile..." />;
   }
 
   const displayName = user?.name || (user?.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : '') || 'Guest User';
@@ -279,121 +239,124 @@ export default function ProfilePage() {
   return (
     <div className={styles.profilePage}>
       {/* Profile Banner */}
-      <div className={styles.profileHeader}>
-        <h1 className={styles.headerTitle}>My Profile</h1>
-        <p className={styles.headerSubtitle}>Manage your account, addresses, and system preferences</p>
+      <div className={styles.pageHeader}>
+        <button className={styles.backBtn} onClick={() => router.back()} aria-label="Go back">
+          <ArrowLeft size={22} />
+        </button>
+        <h1 className={styles.pageTitle}>My Profile</h1>
       </div>
 
-      {/* User Information Card */}
-      <div className={styles.profileCard}>
-        <div
-          onClick={handleOpenEditProfile}
-          className={styles.avatarWrapper}
-          onMouseEnter={() => setIsAvatarHovered(true)}
-          onMouseLeave={() => setIsAvatarHovered(false)}
-        >
-          <div className={`${styles.avatarContainer} ${isAvatarHovered ? styles.avatarContainerHovered : ''}`} style={{ backgroundColor: activeAvatarColor }}>
-            {isCustomUrl ? (
-              <SafeImage
-                src={avatarUri}
-                alt={displayName}
-                className={styles.avatarImage}
-                style={{ opacity: isAvatarHovered ? 0.5 : 1 }}
-              />
-            ) : hasEmojiAvatar ? (
-              <span className={styles.avatarEmoji} style={{ opacity: isAvatarHovered ? 0.5 : 1 }}>{user.profile_picture_url}</span>
-            ) : (
-              <span className={styles.avatarText} style={{ opacity: isAvatarHovered ? 0.5 : 1 }}>{userInitials}</span>
-            )}
-            {isAvatarHovered && (
-              <div style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Camera size={20} color="#FFF" />
-              </div>
-            )}
-          </div>
-          <div className={styles.cameraIconOverlay}>
-            <Camera size={11} color="#FFF" />
-          </div>
-        </div>
-
-        <div className={styles.profileDetails}>
-          <div className={styles.detailsHeader}>
-            <div>
-              <h4 className={styles.userName}>{displayName}</h4>
-              <p className={styles.userEmail}>{user?.email || 'No email added'}</p>
-              {user?.phone_number && (
-                <p className={styles.userPhone}>{user.phone_number}</p>
+      <div className={styles.pageContent}>
+        {/* User Information Card */}
+        <div className={styles.profileCard}>
+          <div
+            onClick={handleOpenEditProfile}
+            className={styles.avatarWrapper}
+            onMouseEnter={() => setIsAvatarHovered(true)}
+            onMouseLeave={() => setIsAvatarHovered(false)}
+          >
+            <div className={`${styles.avatarContainer} ${isAvatarHovered ? styles.avatarContainerHovered : ''}`} style={{ backgroundColor: activeAvatarColor }}>
+              {isCustomUrl ? (
+                <SafeImage
+                  src={avatarUri}
+                  alt={displayName}
+                  className={styles.avatarImage}
+                  style={{ opacity: isAvatarHovered ? 0.5 : 1 }}
+                />
+              ) : hasEmojiAvatar ? (
+                <span className={styles.avatarEmoji} style={{ opacity: isAvatarHovered ? 0.5 : 1 }}>{user.profile_picture_url}</span>
+              ) : (
+                <span className={styles.avatarText} style={{ opacity: isAvatarHovered ? 0.5 : 1 }}>{userInitials}</span>
+              )}
+              {isAvatarHovered && (
+                <div style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Camera size={20} color="#FFF" />
+                </div>
               )}
             </div>
-            <button onClick={handleOpenEditProfile} className={styles.editProfileBtn} title="Edit Profile">
-              <Edit2 size={16} />
-            </button>
+            <div className={styles.cameraIconOverlay}>
+              <Camera size={11} color="#FFF" />
+            </div>
+          </div>
+
+          <div className={styles.profileDetails}>
+            <div className={styles.detailsHeader}>
+              <div>
+                <h4 className={styles.userName}>{displayName}</h4>
+                <p className={styles.userEmail}>{user?.email || 'No email added'}</p>
+                {user?.phone_number && (
+                  <p className={styles.userPhone}>{user.phone_number}</p>
+                )}
+              </div>
+              <button onClick={handleOpenEditProfile} className={styles.editProfileBtn} title="Edit Profile">
+                <Edit2 size={16} />
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Menu Options */}
+        <div className={styles.menuContainer}>
+          {/* Address Book */}
+          <button className={styles.menuItem} onClick={() => router.push('/addresses')}>
+            <div className={styles.menuItemLeft}>
+              <MapPin size={20} />
+              <span className={styles.menuItemText}>Address Book</span>
+            </div>
+            <ChevronRight size={18} className={styles.chevronRight} />
+          </button>
+
+          {/* Share App */}
+          <button className={styles.menuItem} onClick={handleShareApp}>
+            <div className={styles.menuItemLeft}>
+              <Share2 size={20} />
+              <span className={styles.menuItemText}>Share App</span>
+            </div>
+            <ChevronRight size={18} className={styles.chevronRight} />
+          </button>
+
+          {/* About Us */}
+          <button className={styles.menuItem} onClick={() => router.push('/about')}>
+            <div className={styles.menuItemLeft}>
+              <Info size={20} />
+              <span className={styles.menuItemText}>About Us</span>
+            </div>
+            <ChevronRight size={18} className={styles.chevronRight} />
+          </button>
+
+          {/* Contact Us */}
+          <button className={styles.menuItem} onClick={() => router.push('/contact')}>
+            <div className={styles.menuItemLeft}>
+              <PhoneCall size={20} />
+              <span className={styles.menuItemText}>Contact Us</span>
+            </div>
+            <ChevronRight size={18} className={styles.chevronRight} />
+          </button>
+
+          {/* Privacy Policy */}
+          <button className={styles.menuItem} onClick={() => router.push('/privacy')}>
+            <div className={styles.menuItemLeft}>
+              <Lock size={20} />
+              <span className={styles.menuItemText}>Privacy Policy</span>
+            </div>
+            <ChevronRight size={18} className={styles.chevronRight} />
+          </button>
+
+          {/* Terms & Conditions */}
+          <button className={styles.menuItem} onClick={() => router.push('/terms')}>
+            <div className={styles.menuItemLeft}>
+              <FileText size={20} />
+              <span className={styles.menuItemText}>Terms & Conditions</span>
+            </div>
+            <ChevronRight size={18} className={styles.chevronRight} />
+          </button>
+        </div>
+
+        {/* Log Out */}
+        <button className={styles.logoutButton} onClick={handleLogout}>
+          Log Out
+        </button>
       </div>
-
-      {/* Menu Options */}
-      <div className={styles.menuContainer}>
-        {/* Address Book */}
-        <button className={styles.menuItem} onClick={() => router.push('/addresses')}>
-          <div className={styles.menuItemLeft}>
-            <MapPin size={20} />
-            <span className={styles.menuItemText}>Address Book (Location)</span>
-          </div>
-          <ChevronRight size={18} className={styles.chevronRight} />
-        </button>
-
-        {/* Share App */}
-        <button className={styles.menuItem} onClick={handleShareApp}>
-          <div className={styles.menuItemLeft}>
-            <Share2 size={20} />
-            <span className={styles.menuItemText}>Share Website</span>
-          </div>
-          <ChevronRight size={18} className={styles.chevronRight} />
-        </button>
-
-        {/* About Us */}
-        <button className={styles.menuItem} onClick={() => router.push('/about')}>
-          <div className={styles.menuItemLeft}>
-            <Info size={20} />
-            <span className={styles.menuItemText}>About Us</span>
-          </div>
-          <ChevronRight size={18} className={styles.chevronRight} />
-        </button>
-
-        {/* Contact Us */}
-        <button className={styles.menuItem} onClick={() => router.push('/contact')}>
-          <div className={styles.menuItemLeft}>
-            <PhoneCall size={20} />
-            <span className={styles.menuItemText}>Contact Us</span>
-          </div>
-          <ChevronRight size={18} className={styles.chevronRight} />
-        </button>
-
-        {/* Privacy Policy */}
-        <button className={styles.menuItem} onClick={() => router.push('/privacy')}>
-          <div className={styles.menuItemLeft}>
-            <Lock size={20} />
-            <span className={styles.menuItemText}>Privacy Policy</span>
-          </div>
-          <ChevronRight size={18} className={styles.chevronRight} />
-        </button>
-
-        {/* Terms & Conditions */}
-        <button className={styles.menuItem} onClick={() => openInfoModal('Terms & Conditions', TERMS_CONTENT)}>
-          <div className={styles.menuItemLeft}>
-            <FileText size={20} />
-            <span className={styles.menuItemText}>Terms & Conditions</span>
-          </div>
-          <ChevronRight size={18} className={styles.chevronRight} />
-        </button>
-      </div>
-
-      {/* Log Out */}
-      <button className={styles.logoutButton} onClick={handleLogout}>
-        <LogOut size={16} />
-        Log Out
-      </button>
 
       {/* Static Info Display Modal */}
       {modalVisible && (
