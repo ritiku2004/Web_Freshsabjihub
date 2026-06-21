@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, MapPin, AlertTriangle, CheckCircle, Shield, ShoppingBag } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
@@ -23,7 +23,7 @@ const loadRazorpayScript = () => {
   });
 };
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, token, user, activeAddress, serviceAvailable, activeShop, loading } = useContext(AuthContext);
@@ -305,5 +305,17 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <div className={styles.loadingContainer || ''} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '16px' }}>
+        <p style={{ fontSize: '16px', color: '#64748b' }}>Loading checkout...</p>
+      </div>
+    }>
+      <CheckoutContent />
+    </Suspense>
   );
 }

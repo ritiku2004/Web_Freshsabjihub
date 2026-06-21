@@ -27,7 +27,9 @@ export default function ConditionalLayout({ children }) {
       <AppDownloadModal />
       {!isProductPage && (
         <div className="web-navbar-wrapper">
-          <Navbar />
+          <React.Suspense fallback={<div style={{ height: '70px', backgroundColor: '#0f7643' }} />}>
+            <Navbar />
+          </React.Suspense>
         </div>
       )}
       <main className={styles.contentContainer}>
