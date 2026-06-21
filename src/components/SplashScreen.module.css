@@ -1,0 +1,107 @@
+.splashOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #15803D; /* Match #15803D native app color */
+  z-index: 999999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  animation: fadeOut 0.5s ease 2.7s forwards;
+}
+
+.splashContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+.logoContainer {
+  width: 150px;
+  height: 150px;
+  border-radius: 75px;
+  background-color: #FFFFFF;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  transform: scale(0.8);
+  animation: scaleUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.logoImage {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+}
+
+.brandingContainer {
+  position: absolute;
+  bottom: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0 20px;
+  animation: fadeInUp 0.8s ease 0.3s both;
+}
+
+.brandTitle {
+  font-size: 24px;
+  font-weight: 900;
+  color: #FFFFFF;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 0;
+  text-align: center;
+}
+
+.divider {
+  width: 40px;
+  height: 3px;
+  background-color: #FBBF24;
+  border-radius: 1.5px;
+  margin: 12px 0;
+}
+
+.tagline {
+  font-size: 13px;
+  font-weight: 700;
+  color: #FEF3C7;
+  letter-spacing: 0.5px;
+  text-align: center;
+  max-width: 320px;
+  line-height: 18px;
+  margin: 0;
+}
+
+@keyframes scaleUp {
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
