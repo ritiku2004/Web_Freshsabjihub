@@ -39,7 +39,7 @@ export default function SplashScreen() {
           <h1 className={styles.brandTitle}>Fresh Sabji Hub</h1>
           <div className={styles.divider} />
           <p className={styles.tagline}>
-            Fresh vegetables & fruits delivered to your doorstep 🥬
+            Fresh vegetables & fruits delivered to your doorstep
           </p>
         </div>
       </div>
