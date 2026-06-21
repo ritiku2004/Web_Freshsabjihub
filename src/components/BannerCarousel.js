@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import SafeImage from './SafeImage';
 import styles from './BannerCarousel.module.css';
 
 export default function BannerCarousel({ banners = [] }) {
+  const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -70,7 +72,12 @@ export default function BannerCarousel({ banners = [] }) {
                     {banner.description}
                   </p>
                 )}
-                <button className={styles.shopNowBtn}>Shop Now</button>
+                <button 
+                  className={styles.shopNowBtn}
+                  onClick={() => router.push('/categories')}
+                >
+                  Shop Now
+                </button>
               </div>
             </div>
           );

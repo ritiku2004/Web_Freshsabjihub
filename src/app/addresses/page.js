@@ -44,6 +44,7 @@ export default function AddressesPage() {
   const mapRef = useRef(null);
   const leafletMapRef = useRef(null);
   const markerRef = useRef(null);
+  const isTypingRef = useRef(false);
 
   // Populate form when addressType changes
   useEffect(() => {
@@ -101,12 +102,14 @@ export default function AddressesPage() {
         const coords = e.target.getLatLng();
         setLatitude(coords.lat);
         setLongitude(coords.lng);
+        reverseGeocode(coords.lat, coords.lng);
       });
 
       map.on('click', (e) => {
         marker.setLatLng(e.latlng);
         setLatitude(e.latlng.lat);
         setLongitude(e.latlng.lng);
+        reverseGeocode(e.latlng.lat, e.latlng.lng);
       });
 
       leafletMapRef.current = map;
@@ -139,6 +142,61 @@ export default function AddressesPage() {
     }
   }, [latitude, longitude, mapReady]);
 
+  // Search location on typing, matching the mobile app behavior
+  useEffect(() => {
+    if (!isTypingRef.current) return;
+    
+    const timeoutId = setTimeout(async () => {
+      const fullAddress = `${addressLine} ${landmark} ${zipcode}`.trim();
+      if (fullAddress.length > 8) {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) {
+              const best = data[0];
+              const lat = Number(best.lat);
+              const lng = Number(best.lon);
+              setLatitude(lat);
+              setLongitude(lng);
+              
+              if (leafletMapRef.current && markerRef.current) {
+                leafletMapRef.current.setView([lat, lng], 16);
+                markerRef.current.setLatLng([lat, lng]);
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Geocoding search failed:', e);
+        }
+      }
+      isTypingRef.current = false;
+    }, 1500);
+
+    return () => clearTimeout(timeoutId);
+  }, [addressLine, landmark, zipcode]);
+
+  const reverseGeocode = async (lat, lng) => {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.address) {
+          const addr = data.address;
+          const postalCode = addr.postcode || '';
+          const road = addr.road || addr.suburb || addr.neighbourhood || addr.amenity || '';
+          const landmarkVal = addr.suburb || addr.city_district || addr.city || '';
+          
+          setAddressLine(prev => prev || road);
+          setZipcode(prev => prev || postalCode);
+          setLandmark(prev => prev || landmarkVal);
+        }
+      }
+    } catch (e) {
+      console.error('Reverse geocoding failed:', e);
+    }
+  };
+
   const clearForm = () => {
     setReceiverName('');
     setReceiverMobile('');
@@ -162,6 +220,7 @@ export default function AddressesPage() {
         const lng = position.coords.longitude;
         setLatitude(lat);
         setLongitude(lng);
+        reverseGeocode(lat, lng);
       },
       (err) => {
         alert('Failed to get current location. Please allow location access.');
@@ -344,7 +403,7 @@ export default function AddressesPage() {
                 className={styles.formInput}
                 placeholder="Area / Sector / Street / Locality"
                 value={addressLine}
-                onChange={(e) => setAddressLine(e.target.value)}
+                onChange={(e) => { isTypingRef.current = true; setAddressLine(e.target.value); }}
               />
             </div>
 
@@ -354,7 +413,7 @@ export default function AddressesPage() {
                 className={styles.formInput}
                 placeholder="Nearby Landmark (e.g. Near Mall)"
                 value={landmark}
-                onChange={(e) => setLandmark(e.target.value)}
+                onChange={(e) => { isTypingRef.current = true; setLandmark(e.target.value); }}
               />
             </div>
 
@@ -364,7 +423,7 @@ export default function AddressesPage() {
                 className={styles.formInput}
                 placeholder="Zip Code / Pincode"
                 value={zipcode}
-                onChange={(e) => setZipcode(e.target.value.replace(/[^0-9]/g, ''))}
+                onChange={(e) => { isTypingRef.current = true; setZipcode(e.target.value.replace(/[^0-9]/g, '')); }}
                 maxLength={6}
               />
             </div>

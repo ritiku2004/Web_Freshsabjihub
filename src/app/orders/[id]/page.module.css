@@ -1,0 +1,418 @@
+.wrapper {
+  max-width: 500px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  box-sizing: border-box;
+}
+
+.header {
+  background: linear-gradient(135deg, #15803d, #16a34a);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  color: #ffffff;
+}
+
+.backButton {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateX(-2px);
+}
+
+.headerTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  flex: 1;
+  letter-spacing: -0.5px;
+}
+
+/* Alert Box */
+.alertBox {
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 2px 4px rgba(251, 191, 36, 0.05);
+}
+
+.alertHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b45309;
+  font-weight: 750;
+  font-size: 14px;
+}
+
+.alertText {
+  color: #d97706;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Content Container */
+.content {
+  padding: 0 16px 120px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Grid Container */
+.gridContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.leftColumn,
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* General Card */
+.card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.cardTitle {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.3px;
+}
+
+/* Timeline Stepper */
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.timelineStep {
+  display: flex;
+  gap: 16px;
+}
+
+.timelineLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 20px;
+}
+
+.timelineDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  z-index: 2;
+  margin-top: 4px;
+}
+
+.timelineDotActive {
+  background-color: #16a34a;
+  box-shadow: 0 0 0 4px #dcfce7;
+}
+
+.timelineLine {
+  width: 2px;
+  flex: 1;
+  background-color: #e2e8f0;
+  margin: 4px 0;
+  min-height: 40px;
+}
+
+.timelineLineActive {
+  background-color: #16a34a;
+}
+
+.timelineRight {
+  flex: 1;
+  padding-bottom: 24px;
+}
+
+.timelineLastStep .timelineRight {
+  padding-bottom: 0;
+}
+
+.stepTitle {
+  font-size: 14px;
+  font-weight: 750;
+  color: #64748b;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.stepTitleActive {
+  color: #0f172a;
+}
+
+.stepSubtitle {
+  font-size: 12px;
+  color: #94a3b8;
+  display: block;
+  line-height: 1.4;
+}
+
+/* Summary Row */
+.summaryList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.summaryLabel {
+  color: #64748b;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.summaryValue {
+  color: #0f172a;
+  font-weight: 700;
+  text-align: right;
+  max-width: 60%;
+}
+
+/* Items List */
+.itemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.itemRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.itemRow:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.itemLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.itemImage {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: contain;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.itemDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.itemName {
+  font-size: 14px;
+  font-weight: 750;
+  color: #0f172a;
+  margin: 0;
+}
+
+.itemQty {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.itemPrice {
+  font-size: 14px;
+  font-weight: 805;
+  color: #0f172a;
+}
+
+/* Bill Summary */
+.billList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.billRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.billLabel {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.billValue {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.billFree {
+  color: #16a34a;
+  font-weight: 750;
+}
+
+.divider {
+  height: 1px;
+  background-color: #f1f5f9;
+  margin: 4px 0;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: 850;
+  color: #0f172a;
+  margin-top: 4px;
+}
+
+/* Action Container (Mobile sticky) */
+.actionContainer {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 500px;
+  background: #ffffff;
+  border-top: 1px solid #f1f5f9;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+
+.retryButton {
+  background-color: #0f7643;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 750;
+  font-size: 15px;
+  width: 100%;
+  height: 48px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.retryButton:hover {
+  background-color: #0a6531;
+}
+
+.loadingWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  gap: 16px;
+  color: #0f7643;
+}
+
+/* =======================================================
+   LARGE SCREEN STYLES (Desktop / Tablet)
+   ======================================================= */
+@media (min-width: 768px) {
+  .wrapper {
+    max-width: 100%;
+    box-shadow: none;
+    background: #f8fafc;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  .header {
+    border-radius: 0;
+    margin-bottom: 0;
+    padding: 24px 32px;
+  }
+
+  .content {
+    max-width: 750px;
+    width: 90%;
+    margin: 40px auto;
+    padding: 0 0 64px 0;
+    gap: 16px;
+  }
+
+  .gridContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .actionContainer {
+    position: static;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    background: transparent;
+    border-top: none;
+    padding: 16px 0 0 0;
+    box-shadow: none;
+    display: block;
+  }
+}

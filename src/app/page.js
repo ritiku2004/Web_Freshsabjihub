@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, ArrowRight, MapPin, AlertTriangle, Truck, Sp
 import ProductCard from '../components/ProductCard';
 import BannerCarousel from '../components/BannerCarousel';
 import SafeImage from '../components/SafeImage';
+import Loader from '../components/Loader';
 import { AuthContext } from '../context/AuthContext';
 import { api } from '../services/api';
 import styles from './page.module.css';
@@ -61,47 +62,6 @@ function ProductRow({ cat, router, index }) {
   );
 }
 
-function SkeletonLoader() {
-  return (
-    <div className={styles.skeletonContainer}>
-      {/* Banner skeleton */}
-      <div className={styles.skeletonBanner} />
-
-      {/* Category skeleton */}
-      <div className={styles.skeletonSectionHeader}>
-        <div className={styles.skeletonTitle} />
-        <div className={styles.skeletonBtn} />
-      </div>
-      <div className={styles.skeletonCategoryRow}>
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className={styles.skeletonCategoryItem}>
-            <div className={styles.skeletonCircle} />
-            <div className={styles.skeletonTextSmall} />
-          </div>
-        ))}
-      </div>
-
-      {/* Products skeleton */}
-      <div className={styles.skeletonSectionHeader}>
-        <div className={styles.skeletonTitle} />
-        <div className={styles.skeletonBtn} />
-      </div>
-      <div className={styles.skeletonProductRow}>
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className={styles.skeletonProductCard}>
-            <div className={styles.skeletonProductImage} />
-            <div className={styles.skeletonProductInfo}>
-              <div className={styles.skeletonTextSmall} />
-              <div className={styles.skeletonTextMedium} />
-              <div className={styles.skeletonTextSmall} />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default function Home() {
   const router = useRouter();
   const { activeAddress, activeShop, serviceAvailable } = useContext(AuthContext);
@@ -139,7 +99,7 @@ export default function Home() {
     return { ...cat, products };
   }).filter((cat) => cat.products.length > 0).slice(0, 5);
 
-  // ─── Empty States ─────────────────────────────────────────
+  // --- Empty States -----------------------------------------
   if (!activeAddress) {
     return (
       <div className={styles.emptyStateContainer}>
@@ -171,20 +131,20 @@ export default function Home() {
   const isScreenLoading = isLoadingBanners || isLoadingCategories || isLoadingProducts;
 
   if (isScreenLoading) {
-    return <SkeletonLoader />;
+    return <Loader text="Freshness on the way" />;
   }
 
   return (
     <div className={styles.homePage}>
 
-      {/* ─── Hero Banner Carousel ────────────────────────────── */}
+      {/* --- Hero Banner Carousel ------------------------------ */}
       {homeTopBanners.length > 0 && (
         <section className={styles.heroBannerSection}>
           <BannerCarousel banners={homeTopBanners} />
         </section>
       )}
 
-      {/* ─── Shop by Category ────────────────────────────────── */}
+      {/* --- Shop by Category ---------------------------------- */}
       {categories.length > 0 && (
         <section className={styles.categorySection}>
           <div className={styles.sectionHeader}>
@@ -222,7 +182,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* ─── Category Product Rows ───────────────────────────── */}
+      {/* --- Category Product Rows ----------------------------- */}
       {categoriesWithProducts.map((cat, index) => (
         <React.Fragment key={cat.id}>
           <ProductRow cat={cat} router={router} index={index} />

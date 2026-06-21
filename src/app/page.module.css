@@ -29,7 +29,7 @@
   gap: 0;
 }
 
-/* ─── Quick Info Bar ─────────────────────────────────── */
+/* --- Quick Info Bar ----------------------------------- */
 .quickInfoBar {
   display: flex;
   align-items: center;
@@ -62,12 +62,12 @@
   background: rgba(34, 197, 94, 0.2);
 }
 
-/* ─── Hero Banner Section ────────────────────────────── */
+/* --- Hero Banner Section ------------------------------ */
 .heroBannerSection {
   margin-bottom: 32px;
 }
 
-/* ─── Section Headers (shared) ───────────────────────── */
+/* --- Section Headers (shared) ------------------------- */
 .sectionHeader {
   display: flex;
   justify-content: space-between;
@@ -107,31 +107,30 @@
 .viewAllBtn {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 13px;
-  font-weight: 750;
-  color: #16a34a;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f7643;
   background: transparent;
-  border: 1.5px solid #dcfce7;
-  padding: 7px 16px;
-  border-radius: 50px;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: opacity 0.2s ease;
   white-space: nowrap;
 }
 
 .viewAllBtn:hover {
-  background: #dcfce7;
-  border-color: #bbf7d0;
-  transform: translateX(2px);
+  opacity: 0.8;
 }
 
 .viewAllBtn svg {
-  transition: transform 0.25s ease;
+  transition: transform 0.2s ease;
+  color: #0f7643;
 }
 
 .viewAllBtn:hover svg {
   transform: translateX(3px);
+  color: #0f7643;
 }
 
 /* Scroll Arrows */
@@ -162,7 +161,7 @@
   transform: scale(1.05);
 }
 
-/* ─── Category Section ───────────────────────────────── */
+/* --- Category Section --------------------------------- */
 .categorySection {
   margin-bottom: 8px;
 }
@@ -170,25 +169,24 @@
 .categoriesGrid {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 16px;
 }
 
 .categoryCard {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 20px 18px 16px;
+  align-items: stretch;
   background: white;
-  border-radius: 18px;
-  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+  border: 2px solid #0f7643;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
   animation: fadeInUp 0.5s ease both;
-  width: 150px;
+  width: 140px;
+  height: 145px;
 }
 
 @keyframes fadeInUp {
@@ -202,75 +200,52 @@
   }
 }
 
-.categoryCard::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.03) 0%, rgba(16, 185, 129, 0.06) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
 .categoryCard:hover {
   transform: translateY(-6px);
-  border-color: #bbf7d0;
-  box-shadow: 0 16px 32px -8px rgba(34, 197, 94, 0.12), 0 4px 8px rgba(0, 0, 0, 0.04);
-}
-
-.categoryCard:hover::before {
-  opacity: 1;
+  box-shadow: 0 12px 24px rgba(15, 118, 67, 0.15);
 }
 
 .categoryImageWrap {
-  width: 84px;
-  height: 84px;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-bottom: 12px;
+  width: 100%;
+  height: 105px;
   position: relative;
   background: #f8fafc;
-  border: 2px solid #f1f5f9;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
 }
 
 .categoryCard:hover .categoryImageWrap {
-  border-color: #86efac;
-  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.15);
-  transform: scale(1.06);
+  transform: scale(1.03);
 }
 
 .categoryImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 50%;
+  border-radius: 0;
+  transition: transform 0.3s ease;
 }
 
 .categoryImageGlow {
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.categoryCard:hover .categoryImageGlow {
-  opacity: 1;
+  display: none;
 }
 
 .categoryName {
   font-size: 13px;
-  font-weight: 750;
-  color: #1e293b;
-  line-height: 1.3;
+  font-weight: 700;
+  color: white;
+  background-color: #0f7643;
+  padding: 6px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+  line-height: 1.2;
   position: relative;
   z-index: 1;
 }
 
-/* ─── Product Sections ───────────────────────────────── */
+/* --- Product Sections --------------------------------- */
 .productSection {
   margin-top: 36px;
   padding-top: 32px;
@@ -300,12 +275,12 @@
   transform: translateY(-2px);
 }
 
-/* ─── Middle Banner ──────────────────────────────────── */
+/* --- Middle Banner ------------------------------------ */
 .middleBannerSection {
   margin-top: 36px;
 }
 
-/* ─── Empty States ───────────────────────────────────── */
+/* --- Empty States ------------------------------------- */
 .emptyStateContainer {
   background: white;
   border-radius: 24px;
@@ -356,7 +331,7 @@
   margin: 0;
 }
 
-/* ─── Skeleton Loading ───────────────────────────────── */
+/* --- Skeleton Loading --------------------------------- */
 .skeletonContainer {
   display: flex;
   flex-direction: column;
@@ -496,6 +471,10 @@
   flex-direction: column;
   min-height: 500px;
   width: 100%;
+}
+
+.customCategoryHeader {
+  display: none;
 }
 
 .allCategoriesView {
@@ -657,8 +636,12 @@
   }
   
   .productsGrid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 16px;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    gap: 16px !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
   
   .categoryTabTitle {
@@ -1908,24 +1891,27 @@
   .categoriesGrid {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 10px;
   }
   .categoryCard {
     flex: 0 0 calc(20% - 8px);
     max-width: calc(20% - 8px);
-    padding: 14px 8px 12px;
-    border-radius: 14px;
+    height: 110px;
+    padding: 0;
+    border-radius: 12px;
+    border-width: 2px;
   }
 
   .categoryImageWrap {
-    width: 56px;
-    height: 56px;
-    margin-bottom: 8px;
+    width: 100%;
+    height: 75px;
+    margin-bottom: 0;
   }
 
   .categoryName {
     font-size: 11px;
+    padding: 4px 2px;
   }
 
   .productSection {
@@ -1948,8 +1934,14 @@
 
   /* Categories page mobile */
   .categoryProductsLayout {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .categoryProductsGrid {
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .backToCategoriesBtn {
@@ -1957,13 +1949,50 @@
   }
 
   .categorySidebar {
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 8px;
+    display: none !important;
   }
 
-  .sidebarBtn {
-    flex: 0 0 auto;
+  .categoryTabTitle {
+    display: none !important;
+  }
+
+  .customCategoryHeader {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #0f7643;
+    color: white;
+    padding: 0 16px;
+    height: 56px;
+    margin: -16px -14px 16px -14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .headerBackBtn, .headerFilterBtn {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    transition: opacity 0.2s;
+  }
+
+  .headerBackBtn:hover, .headerFilterBtn:hover {
+    opacity: 0.8;
+  }
+
+  .headerTitle {
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 0 12px;
+    flex: 1;
+    text-align: left;
   }
 
   /* Cart mobile */
@@ -1984,23 +2013,27 @@
   .categoriesGrid {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 8px;
   }
   .categoryCard {
     flex: 0 0 calc(25% - 6px);
     max-width: calc(25% - 6px);
-    padding: 12px 6px 10px;
+    height: 95px;
+    padding: 0;
+    border-radius: 10px;
+    border-width: 2px;
   }
 
   .categoryImageWrap {
-    width: 50px;
-    height: 50px;
-    margin-bottom: 6px;
+    width: 100%;
+    height: 65px;
+    margin-bottom: 0;
   }
 
   .categoryName {
-    font-size: 10.5px;
+    font-size: 10px;
+    padding: 3px 2px;
   }
 
   .sectionTitle {
@@ -2023,5 +2056,13 @@
   .productSlide {
     flex: 0 0 160px;
     width: 160px;
+  }
+  .productsGrid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 }

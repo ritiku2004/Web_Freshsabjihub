@@ -2,7 +2,20 @@ const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname =
   ? 'http://localhost:3000/api/v1'
   : 'https://api.freshsabjihub.com/api/v1';
 
+let authToken = null;
+
+const getHeaders = () => {
+  const headers = { 'Content-Type': 'application/json' };
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`;
+  }
+  return headers;
+};
+
 export const api = {
+  setToken: (token) => {
+    authToken = token;
+  },
   // Fetch promotional offer banners from Backend
   getBanners: async () => {
     try {
@@ -155,18 +168,186 @@ export const api = {
     }
   },
 
-  // Submit support/contact inquiry
-  submitSupportQuery: async (subject, description, token, email, name, phone) => {
+  // Request OTP from backend
+  sendOtp: async (email) => {
     try {
-      const headers = {
-        'Content-Type': 'application/json',
-      };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+      const response = await fetch(`${API_BASE_URL}/user/auth/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || 'Failed to send OTP');
       }
-      const response = await fetch(`${API_BASE_URL}/user/support/query`, {
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Send OTP error:', error);
+      throw error;
+    }
+  },
+
+  // Verify custom OTP
+  verifyOtp: async (email, otp) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
+      });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || 'Login failed');
+      }
+      const data = await response.json();
+      return data.data; // Should contain { user, token }
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
+  },
+
+  // Get user profile
+  getProfile: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/auth/profile`, {
+        headers: getHeaders(),
+      });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || 'Failed to fetch profile');
+      }
+      const data = await response.json();
+      return data.data; // The user object
+    } catch (error) {
+      console.error('Get profile error:', error);
+      throw error;
+    }
+  },
+
+  // Update user profile
+  updateProfile: async (name, email, phoneNumber, profilePictureUrl) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/auth/profile`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify({ name, email, phone_number: phoneNumber, profile_picture_url: profilePictureUrl }),
+      });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || 'Failed to update profile');
+      }
+      const data = await response.json();
+      return data.data; // The updated user
+    } catch (error) {
+      console.error('Update profile error:', error);
+      throw error;
+    }
+  },
+
+  // Fetch User Addresses
+  fetchAddresses: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/auth/addresses`, {
+        headers: getHeaders(),
+      });
+      if (!response.ok) throw new Error('Failed to fetch addresses');
+      const data = await response.json();
+      return data.data || [];
+    } catch (error) {
+      console.error('Error fetching addresses:', error);
+      return [];
+    }
+  },
+
+  // Save User Address
+  saveAddress: async (addressData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/auth/addresses`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(addressData),
+      });
+      if (!response.ok) throw new Error('Failed to save address');
+      const data = await response.json();
+      return data.data; // contains id
+    } catch (error) {
+      console.error('Error saving address:', error);
+      throw error;
+    }
+  },
+
+  // Delete User Address
+  deleteAddress: async (addressId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/auth/addresses/${addressId}`, {
+        method: 'DELETE',
+        headers: getHeaders(),
+      });
+      if (!response.ok) throw new Error('Failed to delete address');
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error deleting address:', error);
+      throw error;
+    }
+  },
+
+  // Merge carts
+  mergeCarts: async (guestId, userId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/cart/merge`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guestId, userId }),
+      });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || 'Failed to merge carts');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Merge carts API error:', error);
+      throw error;
+    }
+  },
+
+  // Upload user avatar image
+  uploadAvatar: async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const headers = {};
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/user/auth/upload`, {
         method: 'POST',
         headers,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || 'Upload failed');
+      }
+
+      const data = await response.json();
+      return data.data.url;
+    } catch (error) {
+      console.error('Upload avatar error:', error);
+      throw error;
+    }
+  },
+
+  submitSupportQuery: async (subject, description, email, name, phone) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/support/query`, {
+        method: 'POST',
+        headers: getHeaders(),
         body: JSON.stringify({ subject, description, email, name, phone }),
       });
       if (!response.ok) {

@@ -4,15 +4,16 @@ import React, { useState, useContext, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import SafeImage from '../../components/SafeImage';
 import { AuthContext } from '../../context/AuthContext';
+import { api } from '../../services/api';
 import styles from './login.module.css';
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, isAuthenticated } = useContext(AuthContext);
 
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [otpMode, setOtpMode] = useState(false);
-  const [otpDigits, setOtpDigits] = useState(['', '', '', '']);
+  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
 
   // References for OTP input fields to auto-focus next
@@ -20,26 +21,34 @@ export default function LoginPage() {
     useRef(null),
     useRef(null),
     useRef(null),
-    useRef(null)
+    useRef(null),
+    useRef(null),
+    useRef(null),
   ];
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/profile');
+      router.replace('/profile');
     }
   }, [isAuthenticated, router]);
 
-  const handlePhoneChange = (e) => {
-    const val = e.target.value.replace(/[^0-9]/g, '');
-    if (val.length <= 10) {
-      setPhone(val);
-    }
+  const validateEmail = (emailStr) => {
+    const re = /\S+@\S+\.\S+/;
+    return re.test(emailStr);
   };
 
-  const handleSendOTP = () => {
-    if (phone.length !== 10) return;
-    setOtpMode(true);
+  const handleSendOTP = async () => {
+    if (!validateEmail(email)) return;
+    setLoading(true);
+    try {
+      await api.sendOtp(email.trim().toLowerCase());
+      setOtpMode(true);
+    } catch (err) {
+      alert(err.message || 'Failed to send OTP. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOtpDigitChange = (index, value) => {
@@ -49,7 +58,7 @@ export default function LoginPage() {
     setOtpDigits(newDigits);
 
     // Auto-focus next input
-    if (sanitized && index < 3) {
+    if (sanitized && index < 5) {
       otpRefs[index + 1].current?.focus();
     }
   };
@@ -60,40 +69,27 @@ export default function LoginPage() {
     }
   };
 
-  const handleVerifyOTP = () => {
+  const handleVerifyOTP = async () => {
     const otpCode = otpDigits.join('');
-    if (otpCode !== '1234') {
-      alert('Incorrect verification code. Please enter 1234.');
-      return;
-    }
+    if (otpCode.length !== 6) return;
 
     setLoading(true);
 
     try {
-      const mockUser = {
-        id: 'mock_user_' + phone,
-        name: 'Guest User',
-        phone_number: phone,
-        email: `${phone}@freshsabjihub.com`,
-        profile_picture_url: ''
-      };
-      const mockToken = 'mock_jwt_token_' + phone;
-
-      // Update AuthContext session
-      login(mockUser, mockToken);
-      
-      // Navigate to profile
-      router.push('/profile');
+      const response = await api.verifyOtp(email.trim().toLowerCase(), otpCode);
+      // Response contains { user, token }
+      await login(response.user, response.token);
+      router.replace('/profile');
     } catch (err) {
       console.error(err);
-      alert('Verification failed. Please try again.');
+      alert(err.message || 'Verification failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const isPhoneValid = phone.length === 10;
-  const isOtpValid = otpDigits.join('').length === 4;
+  const isEmailValid = validateEmail(email);
+  const isOtpValid = otpDigits.join('').length === 6;
 
   return (
     <div className={styles.loginPage}>
@@ -110,28 +106,29 @@ export default function LoginPage() {
         {/* Input Form Section */}
         {!otpMode ? (
           <div className={styles.formSection}>
-            <label className={styles.inputLabel}>Enter Mobile Number</label>
+            <label className={styles.inputLabel}>Enter Email Address</label>
             <input
-              type="tel"
+              type="email"
               className={styles.inputField}
-              placeholder="Enter your 10-digit mobile number"
-              value={phone}
-              onChange={handlePhoneChange}
-              maxLength={10}
+              placeholder="Enter your email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoCapitalize="none"
+              autoComplete="email"
             />
             <button
               className={styles.continueBtn}
               onClick={handleSendOTP}
-              disabled={!isPhoneValid || loading}
+              disabled={!isEmailValid || loading}
             >
               {loading ? 'Sending...' : 'Continue'}
             </button>
           </div>
         ) : (
           <div className={styles.formSection}>
-            <label className={styles.inputLabel}>Enter 4-Digit OTP</label>
+            <label className={styles.inputLabel}>Enter 6-Digit OTP</label>
             <p style={{ fontSize: '13px', color: '#6b7280', marginTop: '-4px', marginBottom: '16px' }}>
-              We've generated a verification code for <strong>+91 {phone}</strong>. Use <strong>1234</strong> for testing.
+              We've sent a verification code to <strong>{email}</strong>.
             </p>
             
             <div className={styles.otpRow}>
@@ -145,6 +142,7 @@ export default function LoginPage() {
                   value={digit}
                   onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                  style={{ width: '40px', height: '40px', fontSize: '18px', textAlign: 'center', margin: '0 4px' }}
                 />
               ))}
             </div>
@@ -153,6 +151,7 @@ export default function LoginPage() {
               className={styles.continueBtn}
               onClick={handleVerifyOTP}
               disabled={!isOtpValid || loading}
+              style={{ marginTop: '20px' }}
             >
               {loading ? 'Verifying...' : 'Verify & Login'}
             </button>
@@ -161,10 +160,10 @@ export default function LoginPage() {
               className={styles.changePhoneBtn}
               onClick={() => {
                 setOtpMode(false);
-                setOtpDigits(['', '', '', '']);
+                setOtpDigits(['', '', '', '', '', '']);
               }}
             >
-              ← Change Phone Number
+              ← Change Email Address
             </button>
           </div>
         )}
