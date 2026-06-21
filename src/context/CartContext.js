@@ -3,7 +3,7 @@
 import React, { createContext, useState, useEffect, useContext, useCallback, useRef } from 'react';
 import { AuthContext } from './AuthContext';
 
-const API_BASE_URL = 'https://api.freshsabjihub.com/api/v1';
+import { API_BASE_URL } from '../services/api';
 
 export const CartContext = createContext({
   cartItems: [],

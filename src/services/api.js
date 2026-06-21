@@ -1,6 +1,21 @@
-const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-  ? 'http://localhost:3000/api/v1'
-  : 'https://api.freshsabjihub.com/api/v1';
+export const getApiBaseUrl = () => {
+  if (typeof window === 'undefined') {
+    return 'http://localhost:5000/api/v1';
+  }
+  const hostname = window.location.hostname;
+  if (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname.startsWith('10.') ||
+    hostname.startsWith('192.168.') ||
+    hostname.startsWith('172.')
+  ) {
+    return `http://${hostname}:5000/api/v1`;
+  }
+  return 'https://api.freshsabjihub.com/api/v1';
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 
 let authToken = null;
 
@@ -52,6 +67,22 @@ export const api = {
       return data.data;
     } catch (error) {
       console.error('Error fetching shop by zipcode:', error);
+      return null;
+    }
+  },
+
+  // Fetch nearest shop by latitude and longitude (15km radius check handled by backend)
+  getNearestShop: async (latitude, longitude) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/catalog/nearest-shop?latitude=${latitude}&longitude=${longitude}`);
+      if (!response.ok) {
+        if (response.status === 404) return null; // No shop found
+        throw new Error('Failed to fetch nearest shop');
+      }
+      const data = await response.json();
+      return data.data;
+    } catch (error) {
+      console.error('Error fetching nearest shop:', error);
       return null;
     }
   },

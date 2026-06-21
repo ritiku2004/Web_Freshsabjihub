@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-const API_BASE_URL = 'https://api.freshsabjihub.com/api/v1';
+import { API_BASE_URL } from '../services/api';
 
 export default function SafeImage({ src, alt, className, style, width, height }) {
   // SVG vector green organic placeholder for fresh vegetables/fruits

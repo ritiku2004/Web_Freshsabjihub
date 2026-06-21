@@ -1,0 +1,280 @@
+.notificationsPage {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 20px;
+  min-height: 70vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 16px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.backBtn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.actionBtn {
+  background: #f1f5f9;
+  border: none;
+  color: #475569;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.actionBtn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.clearBtn {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.clearBtn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.notificationsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.notificationCard {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+
+.unreadCard {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.clickableCard {
+  cursor: pointer;
+}
+
+.clickableCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.iconWrapper {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconOrder {
+  color: #10b981;
+  background: #d1fae5;
+  padding: 8px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
+.iconPromo {
+  color: #f59e0b;
+  background: #fef3c7;
+  padding: 8px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
+.iconDefault {
+  color: #3b82f6;
+  background: #dbeafe;
+  padding: 8px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
+.textContainer {
+  flex: 1;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4px;
+  gap: 12px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.unreadTitle {
+  color: #0f7643;
+  font-weight: 750;
+}
+
+.timeText {
+  font-size: 12px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.messageText {
+  font-size: 14px;
+  color: #475569;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Empty State */
+.emptyContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.emptyIconCircle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.emptyBell {
+  color: #cbd5e1;
+}
+
+.emptyTitle {
+  font-size: 20px;
+  font-weight: 750;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.emptySubtitle {
+  font-size: 14px;
+  color: #64748b;
+  max-width: 320px;
+  margin: 0;
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: 16px;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #0f7643;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+  .notificationsPage {
+    margin: 16px auto;
+    padding: 0 12px;
+  }
+  .headerActions {
+    width: 100%;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .actionBtn {
+    flex: 1;
+    justify-content: center;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  .notificationCard {
+    padding: 12px;
+    gap: 12px;
+  }
+  .cardHeader {
+    flex-direction: column;
+    gap: 2px;
+  }
+  .timeText {
+    font-size: 11px;
+  }
+}

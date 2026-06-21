@@ -69,7 +69,6 @@ export default function Home() {
   const { data: banners = [], isLoading: isLoadingBanners } = useQuery({
     queryKey: ['banners'],
     queryFn: api.getBanners,
-    enabled: !!activeAddress && !!serviceAvailable,
   });
 
   const homeTopBanners = banners.filter(
@@ -82,13 +81,13 @@ export default function Home() {
   const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories', activeShop?.id],
     queryFn: () => api.getCategories(activeShop?.id),
-    enabled: !!activeAddress && !!serviceAvailable && !!activeShop?.id,
+    enabled: !!activeShop?.id,
   });
 
   const { data: productsData, isLoading: isLoadingProducts } = useQuery({
     queryKey: ['homeAllProducts', activeShop?.id],
     queryFn: () => api.getProducts({ shopId: activeShop?.id, limit: 100 }),
-    enabled: !!activeAddress && !!serviceAvailable && !!activeShop?.id,
+    enabled: !!activeShop?.id,
   });
 
   const allProducts = productsData?.products || [];

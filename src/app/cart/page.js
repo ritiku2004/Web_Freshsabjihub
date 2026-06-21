@@ -11,20 +11,6 @@ import { api } from '../../services/api';
 import { MOCK_CATEGORIES } from '../data';
 import styles from '../page.module.css';
 
-const loadRazorpayScript = () => {
-  return new Promise((resolve) => {
-    if (typeof window !== "undefined" && window.Razorpay) {
-      resolve(true);
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-};
-
 export default function CartPage() {
   const router = useRouter();
   const { isAuthenticated, token, user, activeAddress, serviceAvailable, activeShop } = useContext(AuthContext);
@@ -50,154 +36,8 @@ export default function CartPage() {
   const [driverTip, setDriverTip] = useState(0);
   const [isCustomTipOpen, setIsCustomTipOpen] = useState(false);
   const [customTipInput, setCustomTipInput] = useState('');
-  const [showOrderSuccess, setShowOrderSuccess] = useState(false);
-  const [latestOrderNo, setLatestOrderNo] = useState('');
-  const paymentMethod = 'prepaid';
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const finalTotal = Math.round((cartGrandTotal + driverTip) * 100) / 100;
-
-  const handlePlaceOrder = async () => {
-    if (!isAuthenticated || !token) {
-      alert('Please login to place an order.');
-      router.push('/login');
-      return;
-    }
-
-    if (isProcessing) return;
-    setIsProcessing(true);
-
-    try {
-      const orderPayload = {
-        shopId: activeShop?.id || 1,
-        addressId: activeAddress?.id,
-        totalAmount: finalTotal,
-        items: cartItems.map(item => ({
-          productId: item.productId,
-          quantity: item.quantity,
-        })),
-        tipAmount: driverTip,
-        discountAmount: cartSavings,
-        handlingFee: handlingFee,
-        deliveryFee: deliveryFee,
-        paymentMethod: paymentMethod
-      };
-
-      const result = await api.createOrder(orderPayload, token);
-
-      if (paymentMethod === 'cod') {
-        const orderNo = result.data.orderNumber;
-        const newOrder = {
-          id: result.data.orderId,
-          orderNumber: orderNo,
-          date: new Date(result.data.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-          status: 'Processing',
-          items: cartItems.map(item => ({
-            productId: item.productId,
-            name: item.name,
-            quantity: item.quantity,
-            price: item.discountPrice
-          })),
-          totalAmount: finalTotal
-        };
-
-        if (typeof window !== 'undefined') {
-          const savedOrders = JSON.parse(localStorage.getItem('pastOrders') || '[]');
-          localStorage.setItem('pastOrders', JSON.stringify([newOrder, ...savedOrders]));
-        }
-
-        setLatestOrderNo(orderNo);
-        setShowOrderSuccess(true);
-        clearCart();
-        setDriverTip(0);
-      } else {
-        const rzpData = result.data;
-        const scriptLoaded = await loadRazorpayScript();
-        if (!scriptLoaded) {
-          alert('Failed to load Razorpay payment gateway. Please try again.');
-          setIsProcessing(false);
-          return;
-        }
-
-        const options = {
-          key: rzpData.razorpayKeyId,
-          amount: rzpData.amountPaise,
-          currency: 'INR',
-          name: 'Freshsabjihub',
-          description: `Order #${rzpData.orderNumber}`,
-          order_id: rzpData.razorpayOrderId,
-          prefill: {
-            name: user?.name || 'Guest User',
-            email: user?.email || `${user?.phone_number || 'guest'}@freshsabjihub.com`,
-            contact: user?.phone_number || ''
-          },
-          theme: {
-            color: '#22c55e'
-          },
-          handler: async (response) => {
-            try {
-              const verificationPayload = {
-                orderId: rzpData.orderId,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpayOrderId: response.razorpay_order_id,
-                razorpaySignature: response.razorpay_signature
-              };
-
-              const verificationResult = await api.verifyPayment(verificationPayload, token);
-
-              if (verificationResult.success) {
-                const newOrder = {
-                  id: rzpData.orderId,
-                  orderNumber: rzpData.orderNumber,
-                  date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-                  status: 'Processing',
-                  items: cartItems.map(item => ({
-                    productId: item.productId,
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.discountPrice
-                  })),
-                  totalAmount: finalTotal
-                };
-
-                if (typeof window !== 'undefined') {
-                  const savedOrders = JSON.parse(localStorage.getItem('pastOrders') || '[]');
-                  localStorage.setItem('pastOrders', JSON.stringify([newOrder, ...savedOrders]));
-                }
-
-                clearCart();
-                setDriverTip(0);
-                router.push('/orders');
-              } else {
-                alert('Payment verification failed.');
-              }
-            } catch (err) {
-              console.error(err);
-              alert('Error verifying payment.');
-            }
-          },
-          modal: {
-            ondismiss: () => {
-              alert('Payment process cancelled by user.');
-            }
-          }
-        };
-
-        const paymentObject = new window.Razorpay(options);
-        paymentObject.open();
-      }
-    } catch (err) {
-      console.error(err);
-      alert(err.message || 'An error occurred while placing the order.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleViewOrders = () => {
-    setShowOrderSuccess(false);
-    router.push('/orders');
-  };
 
   // Calculate promo message
   let promoMessage = null;
@@ -216,21 +56,6 @@ export default function CartPage() {
     } else if (distHandling > 0) {
       promoMessage = `Add ₹${distHandling} more for free handling!`;
     }
-  }
-
-  if (showOrderSuccess) {
-    return (
-      <div className={styles.emptyStateContainer} style={{ borderColor: '#22c55e', background: '#f0fdf4' }}>
-        <CheckCircle size={48} color="#22c55e" />
-        <h2 className={styles.emptyStateTitle}>Order Placed Successfully!</h2>
-        <p className={styles.emptyStateText}>
-          Your order <strong>{latestOrderNo}</strong> has been received and is being prepared for delivery. It will arrive shortly.
-        </p>
-        <button className={styles.emptyStateBtn} onClick={handleViewOrders}>
-          Track Order Status
-        </button>
-      </div>
-    );
   }
 
   if (!activeAddress) {
@@ -447,18 +272,15 @@ export default function CartPage() {
               <span>₹{finalTotal}</span>
             </div>
 
-            {/* Payment Method Selector removed for direct Razorpay checkout */}
-
             <span className={styles.gstNotice}>
               * Prices are inclusive of all taxes. Free delivery above ₹300, and free packaging/handling above ₹500.
             </span>
 
             <button
               className={styles.checkoutBtn}
-              onClick={handlePlaceOrder}
-              disabled={isProcessing}
+              onClick={() => router.push(`/checkout?tip=${driverTip}`)}
             >
-              {isProcessing ? 'Processing...' : 'Pay & Place Order'}
+              Proceed to Checkout
             </button>
           </div>
         </div>
@@ -484,10 +306,9 @@ export default function CartPage() {
 
             <button
               className={styles.checkoutBtnMobile}
-              onClick={handlePlaceOrder}
-              disabled={isProcessing}
+              onClick={() => router.push(`/checkout?tip=${driverTip}`)}
             >
-              {isProcessing ? 'Processing...' : 'Pay & Place Order'}
+              Proceed to Checkout
             </button>
           </div>
         </div>

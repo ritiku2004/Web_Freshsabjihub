@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense, useContext } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, SlidersHorizontal } from 'lucide-react';
+import { ArrowLeft, SlidersHorizontal, ChevronRight } from 'lucide-react';
 import BannerCarousel from '../../components/BannerCarousel';
 import ProductCard from '../../components/ProductCard';
 import SafeImage from '../../components/SafeImage';
@@ -35,23 +35,22 @@ function CategoriesContent() {
   const { data: banners = [] } = useQuery({
     queryKey: ['banners'],
     queryFn: api.getBanners,
-    enabled: !!activeAddress && !!serviceAvailable,
   });
 
   const categoryBanners = banners.filter(
-    (b) => b.location === 'category' || b.location === 'categories'
+    (b) => b.location === 'category_top' || b.location === 'categorytop' || b.location === 'category' || b.location === 'categories'
   );
 
   const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories', activeShop?.id],
     queryFn: () => api.getCategories(activeShop?.id),
-    enabled: !!activeAddress && !!serviceAvailable && !!activeShop?.id,
+    enabled: !!activeShop?.id,
   });
 
   const { data: productsData, isLoading: isLoadingProducts } = useQuery({
     queryKey: ['categoryProducts', activeShop?.id, selectedCategoryId],
     queryFn: () => api.getProducts({ shopId: activeShop?.id, categoryId: selectedCategoryId, limit: 100 }),
-    enabled: !!activeAddress && !!serviceAvailable && !!activeShop?.id && !!selectedCategoryId,
+    enabled: !!activeShop?.id && !!selectedCategoryId,
   });
 
   const categoryProducts = productsData?.products || [];
@@ -91,13 +90,7 @@ function CategoriesContent() {
       {selectedCategoryId === null ? (
         /* "All Categories" view */
         <div className={styles.allCategoriesView}>
-          {/* Top Promo Banner */}
-          {categoryBanners.length > 0 && (
-            <div className={styles.bannersSection}>
-              <BannerCarousel banners={categoryBanners} />
-            </div>
-          )}
-
+          <h2 className={styles.categoriesTitle}>Categories</h2>
           {/* All Categories Grid */}
           <div className={styles.categoriesGrid}>
             {categories.map((cat, idx) => (
@@ -116,9 +109,25 @@ function CategoriesContent() {
                   <div className={styles.categoryImageGlow} />
                 </div>
                 <span className={styles.categoryName}>{cat.name}</span>
+
+                {/* Mobile List View Info (hidden on desktop) */}
+                <div className={styles.categoryListDetails}>
+                  <span className={styles.categoryListName}>{cat.name}</span>
+                  <span className={styles.categoryListSubtitle}>Explore Products</span>
+                </div>
+                <div className={styles.categoryListArrow}>
+                  <ChevronRight size={18} strokeWidth={2.5} />
+                </div>
               </div>
             ))}
           </div>
+
+          {/* Promo Banner (rendered below categories) */}
+          {categoryBanners.length > 0 && (
+            <div className={styles.bannersSection} style={{ marginTop: '16px' }}>
+              <BannerCarousel banners={categoryBanners} />
+            </div>
+          )}
         </div>
       ) : (
         /* "Category Products" view */

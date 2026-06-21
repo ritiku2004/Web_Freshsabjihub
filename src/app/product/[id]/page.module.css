@@ -13,7 +13,7 @@
 
 .header {
   background: linear-gradient(135deg, #15803d, #16a34a);
-  padding: 24px;
+  padding: 20px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -45,7 +45,7 @@
 }
 
 .headerTitle {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: #ffffff;
   margin: 0;
@@ -79,7 +79,9 @@
 /* Desktop-only back button (hidden on mobile) */
 .desktopBackContainer {
   display: none;
-  margin-bottom: 20px;
+  max-width: 1200px;
+  margin: 32px auto 0 auto;
+  padding: 0 24px;
 }
 
 .desktopBackBtn {
@@ -92,11 +94,17 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
 }
 
 .desktopBackBtn:hover {
   color: #0f7643;
+  border-color: #0f7643;
+  transform: translateX(-4px);
 }
 
 .mainContentGrid {
@@ -120,12 +128,39 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
 }
 
 .image {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+}
+
+/* Out of Stock Overlay */
+.outOfStockOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 5;
+  border-radius: 12px;
+}
+
+.outOfStockText {
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 8px 16px;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
 .rightColumn {
@@ -153,11 +188,38 @@
   font-weight: 600;
 }
 
-.price {
+/* Discount pricing styling */
+.priceLayout {
+  margin: 8px 0;
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.discountPrice {
   font-size: 26px;
   font-weight: 800;
   color: #0f172a;
-  margin: 0;
+}
+
+.originalPrice {
+  font-size: 18px;
+  color: #94a3b8;
+  text-decoration: line-through;
+  font-weight: 600;
+}
+
+.savingsLabel {
+  background: #ecfdf5;
+  color: #10b981;
+  font-size: 11px;
+  font-weight: 750;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.15);
 }
 
 /* Desktop-only actions (hidden on mobile) */
@@ -175,14 +237,51 @@
   font-size: 16px;
   font-weight: 800;
   color: #0f172a;
-  margin: 0 0 10px 0;
+  margin: 0 0 12px 0;
+  border-left: 3px solid #16a34a;
+  padding-left: 10px;
 }
 
 .sectionContent {
   font-size: 14px;
   color: #475569;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
+}
+
+/* Specifications Grid styling */
+.specsGrid {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fafafc;
+}
+
+.specRow {
+  display: flex;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.specRow:last-child {
+  border-bottom: none;
+}
+
+.specName {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+  flex: 1;
+}
+
+.specValue {
+  font-size: 13px;
+  color: #0f172a;
+  font-weight: 700;
+  flex: 1.5;
+  text-align: right;
 }
 
 .whyChooseSection {
@@ -241,6 +340,27 @@
   color: #64748b;
   margin: 0;
   line-height: 1.4;
+}
+
+/* Related Suggestions styling */
+.relatedSection {
+  margin: 32px 0 100px 0;
+  padding: 0 20px;
+}
+
+.relatedHeading {
+  font-size: 18px;
+  font-weight: 850;
+  color: #0f172a;
+  margin-bottom: 16px;
+  border-left: 3px solid #16a34a;
+  padding-left: 10px;
+}
+
+.relatedGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
 }
 
 .stickyFooter {
@@ -337,6 +457,35 @@
   background-color: #0a6531;
 }
 
+.disabledButton {
+  background-color: #cbd5e1;
+  color: #64748b;
+  border: none;
+  border-radius: 8px;
+  font-weight: 750;
+  font-size: 14px;
+  width: 150px;
+  height: 40px;
+  cursor: not-allowed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.disabledStickyButton {
+  background-color: #cbd5e1;
+  color: #64748b;
+  border-radius: 8px;
+  font-weight: 750;
+  font-size: 14px;
+  width: 120px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: not-allowed;
+}
+
 .loadingWrapper {
   display: flex;
   flex-direction: column;
@@ -360,9 +509,13 @@
   }
 
   .header {
-    border-radius: 0;
-    margin-bottom: 0;
-    padding: 24px 32px;
+    display: none;
+  }
+
+  .desktopBackContainer {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
   }
 
   .mainContentGrid {
@@ -376,7 +529,7 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
     border: 1px solid #f1f5f9;
     max-width: 1200px;
-    margin: 40px auto;
+    margin: 24px auto;
   }
 
   .imageSection {
@@ -388,6 +541,7 @@
 
   .imageContainer {
     max-width: 450px;
+    max-height: 450px;
   }
 
   .detailsSection {
@@ -404,8 +558,21 @@
     margin-bottom: 20px;
   }
 
-  .price {
-    font-size: 30px;
+  .priceRow {
+    gap: 16px;
+  }
+
+  .discountPrice {
+    font-size: 32px;
+  }
+
+  .originalPrice {
+    font-size: 20px;
+  }
+
+  .savingsLabel {
+    font-size: 12px;
+    padding: 4px 10px;
   }
 
   .desktopActions {
@@ -418,6 +585,16 @@
 
   .whyChooseSection {
     padding: 24px 0 0 0;
+  }
+  
+  .relatedSection {
+    margin: 48px auto 100px auto;
+    padding: 0 24px;
+  }
+  
+  .relatedGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
   }
 
   .stickyFooter {

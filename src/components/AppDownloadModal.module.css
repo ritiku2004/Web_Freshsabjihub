@@ -1,0 +1,207 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modalWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalContainer {
+  position: relative;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.closeButton {
+  position: absolute;
+  top: -56px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000000;
+}
+
+.closeButton:hover {
+  background: #000000;
+  transform: translateX(-50%) scale(1.05);
+}
+
+.bannerSection {
+  position: relative;
+  background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
+  height: 180px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.bannerImage {
+  width: 90%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  transform: translateY(10px);
+}
+
+/* Wavy separator */
+.waveSeparator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 15px;
+  color: #ffffff;
+  fill: currentColor;
+}
+
+.logoContainer {
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 64px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 6px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.contentSection {
+  padding: 48px 24px 28px 24px;
+  text-align: center;
+  background: #ffffff;
+}
+
+.subHeading {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.heading {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1f2937;
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+
+.highlightText {
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 24px;
+}
+
+.downloadButton {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  background-color: #0c831f;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(12, 131, 31, 0.2);
+  text-decoration: none;
+}
+
+.downloadButton:hover {
+  background-color: #0a6e1a;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(12, 131, 31, 0.3);
+}
+
+.continueButton {
+  display: inline-block;
+  margin-top: 14px;
+  background: none;
+  border: none;
+  color: #0c831f;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  padding: 4px 8px;
+}
+
+.continueButton:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

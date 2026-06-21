@@ -4,6 +4,7 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import AppDownloadModal from './AppDownloadModal';
 import styles from '../app/page.module.css';
 
 export default function ConditionalLayout({ children }) {
@@ -15,6 +16,7 @@ export default function ConditionalLayout({ children }) {
   if (hideLayout) {
     return (
       <main style={{ width: '100%', minHeight: '100vh', backgroundColor: '#ffffff' }}>
+        <AppDownloadModal />
         {children}
       </main>
     );
@@ -22,6 +24,7 @@ export default function ConditionalLayout({ children }) {
 
   return (
     <div className={`${styles.mainContainer} ${isStaticAppPage ? 'about-page-layout' : ''} ${isProductPage ? 'product-page-layout' : ''}`}>
+      <AppDownloadModal />
       {!isProductPage && (
         <div className="web-navbar-wrapper">
           <Navbar />

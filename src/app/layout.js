@@ -5,6 +5,10 @@ import ConditionalLayout from "../components/ConditionalLayout";
 export const metadata = {
   title: "Fresh Sabji Hub - Fresh Vegetables & Groceries Delivered",
   description: "Get fresh organic vegetables and daily essentials delivered right to your doorstep from Fresh Sabji Hub.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  }
 };
 
 export default function RootLayout({ children }) {

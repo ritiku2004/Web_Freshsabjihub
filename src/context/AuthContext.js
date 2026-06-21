@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
 
   const updateLocationAndShop = async (address) => {
-    if (!address || !address.zipcode) {
+    if (!address || !address.latitude || !address.longitude) {
       setActiveAddress(address);
       setActiveShop(null);
       setServiceAvailable(false);
@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const shop = await api.getShopByZipcode(address.zipcode);
+      const shop = await api.getNearestShop(address.latitude, address.longitude);
       if (shop) {
         setActiveShop(shop);
         setServiceAvailable(true);

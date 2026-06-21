@@ -169,7 +169,7 @@
 .categoriesGrid {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 16px;
 }
 
@@ -194,6 +194,7 @@
     opacity: 0;
     transform: translateY(16px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -244,6 +245,154 @@
   position: relative;
   z-index: 1;
 }
+
+/* ==========================================
+   Categories Page Scoped Styles 
+   ========================================== */
+
+/* Large Screens (Desktop) - Categories Page ONLY */
+.allCategoriesView .categoryCard {
+  width: 180px;
+  height: 190px;
+  border-radius: 20px;
+}
+
+.allCategoriesView .categoryImageWrap {
+  height: 140px;
+}
+
+.allCategoriesView .categoryName {
+  font-size: 15px;
+  padding: 8px 6px;
+}
+
+.allCategoriesView .categoriesTitle {
+  font-size: 26px;
+  font-weight: 850;
+  color: #0f172a;
+  letter-spacing: -0.6px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border-left: 4px solid #10b981;
+  padding-left: 12px;
+}
+
+/* Hide mobile-specific list info on desktop */
+.allCategoriesView .categoryListDetails,
+.allCategoriesView .categoryListArrow {
+  display: none;
+}
+
+/* Mobile Screens (List View) - Categories Page ONLY */
+@media (max-width: 768px) {
+  .allCategoriesView {
+    gap: 16px;
+  }
+
+  .allCategoriesView .categoriesTitle {
+    display: none !important;
+  }
+
+  .allCategoriesView .categoriesGrid {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding: 0;
+    order: 2; /* Move categories below the banner on mobile */
+  }
+
+  .allCategoriesView .bannersSection {
+    order: 1; /* Move banner above the categories on mobile */
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .allCategoriesView .categoryCard {
+    flex-direction: row;
+    align-items: center;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 76px;
+    padding: 8px 16px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+    gap: 14px;
+    animation: fadeInUp 0.4s ease both;
+    overflow: visible;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .allCategoriesView .categoryCard:hover,
+  .allCategoriesView .categoryCard:active {
+    transform: translateY(-2px);
+    border-color: #10b981;
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1), 0 4px 6px -2px rgba(16, 185, 129, 0.05);
+  }
+
+  .allCategoriesView .categoryImageWrap {
+    width: 54px;
+    height: 54px;
+    border-radius: 10px;
+    background: #f8fafc;
+    flex-shrink: 0;
+    border: 1px solid #f1f5f9;
+  }
+
+  .allCategoriesView .categoryImage {
+    border-radius: 10px;
+    object-fit: contain;
+  }
+
+  /* Hide original desktop banner title label on mobile */
+  .allCategoriesView .categoryName {
+    display: none !important;
+  }
+
+  /* Mobile text details */
+  .allCategoriesView .categoryListDetails {
+    display: flex !important;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .allCategoriesView .categoryListName {
+    font-size: 15px;
+    font-weight: 750;
+    color: #0f172a;
+  }
+
+  .allCategoriesView .categoryListSubtitle {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  /* Mobile list arrow icon container */
+  .allCategoriesView .categoryListArrow {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #f0fdf4;
+    color: #10b981;
+    transition: all 0.2s ease;
+    margin-left: auto;
+  }
+
+  .allCategoriesView .categoryCard:hover .categoryListArrow {
+    background: #10b981;
+    color: #ffffff;
+    transform: translateX(2px);
+  }
+}
+
 
 /* --- Product Sections --------------------------------- */
 .productSection {
@@ -339,8 +488,13 @@
 }
 
 @keyframes shimmer {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
+  0% {
+    background-position: -400px 0;
+  }
+
+  100% {
+    background-position: 400px 0;
+  }
 }
 
 .skeletonBanner {
@@ -459,6 +613,7 @@
   cursor: pointer;
   padding: 0;
 }
+
 .seeAllText:hover {
   text-decoration: underline;
 }
@@ -539,6 +694,7 @@
 .categorySidebar::-webkit-scrollbar {
   width: 6px;
 }
+
 .categorySidebar::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 10px;
@@ -599,7 +755,7 @@
     flex-direction: column;
     gap: 16px;
   }
-  
+
   .categorySidebar {
     flex-direction: row;
     position: sticky;
@@ -622,7 +778,7 @@
   .categorySidebar::-webkit-scrollbar {
     display: none;
   }
-  
+
   .sidebarBtn {
     height: 40px;
     padding: 0 20px;
@@ -630,11 +786,11 @@
     border: 1px solid #e2e8f0;
     font-size: 14px;
   }
-  
+
   .activeSidebarBtn {
     border: none;
   }
-  
+
   .productsGrid {
     display: grid !important;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
@@ -643,7 +799,7 @@
     width: 100% !important;
     max-width: 100% !important;
   }
-  
+
   .categoryTabTitle {
     font-size: 20px;
   }
@@ -1335,6 +1491,7 @@
     transform: scale(0.95);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
@@ -1835,7 +1992,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1891,9 +2050,10 @@
   .categoriesGrid {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 10px;
   }
+
   .categoryCard {
     flex: 0 0 calc(20% - 8px);
     max-width: calc(20% - 8px);
@@ -1970,7 +2130,8 @@
     z-index: 100;
   }
 
-  .headerBackBtn, .headerFilterBtn {
+  .headerBackBtn,
+  .headerFilterBtn {
     background: transparent;
     border: none;
     color: white;
@@ -1982,7 +2143,8 @@
     transition: opacity 0.2s;
   }
 
-  .headerBackBtn:hover, .headerFilterBtn:hover {
+  .headerBackBtn:hover,
+  .headerFilterBtn:hover {
     opacity: 0.8;
   }
 
@@ -2013,9 +2175,10 @@
   .categoriesGrid {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 8px;
   }
+
   .categoryCard {
     flex: 0 0 calc(25% - 6px);
     max-width: calc(25% - 6px);
@@ -2057,6 +2220,7 @@
     flex: 0 0 160px;
     width: 160px;
   }
+
   .productsGrid {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;

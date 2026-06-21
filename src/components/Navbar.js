@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Store, LayoutGrid, ShoppingCart, RotateCcw, User, Bell, ChevronDown, Search, Mic, ArrowLeft } from 'lucide-react';
+import { Store, LayoutGrid, ShoppingCart, RotateCcw, User, Bell, ChevronDown, Search, Mic, ArrowLeft, X } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
+import { useNotifications } from '../context/NotificationContext';
 import LocationModal from './LocationModal';
 import styles from './Navbar.module.css';
 
@@ -24,8 +25,54 @@ export default function Navbar({
 
   const { activeAddress, deliveryETA, serviceAvailable, isAuthenticated } = useContext(AuthContext);
   const { cartTotalQuantity } = useContext(CartContext);
+  const { unreadCount } = useNotifications();
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Sync searchQuery with URL q param
+  const q = searchParams.get('q') || '';
+  useEffect(() => {
+    setSearchQuery(q);
+  }, [q]);
+
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+    if (pathname === '/search') {
+      if (val.trim() === '') {
+        router.push('/');
+      } else {
+        router.replace(`/search?q=${encodeURIComponent(val)}`);
+      }
+    } else {
+      router.push(`/search?q=${encodeURIComponent(val)}`);
+    }
+  };
+
+  const handleInputClick = () => {
+    if (pathname !== '/search') {
+      router.push('/search');
+    }
+  };
+
+  const handleBlur = () => {
+    if (pathname !== '/search') return;
+    
+    // Slight delay to allow click events on suggestions/pills/product cards to register first
+    setTimeout(() => {
+      const activeEl = document.activeElement;
+      if (activeEl && (
+        activeEl.closest('[class*="searchContainer"]') || 
+        activeEl.closest('[class*="ProductCard"]') ||
+        activeEl.closest('button') ||
+        activeEl.closest('a')
+      )) {
+        return; // Prevent redirect if user clicked a valid interactive element in search page
+      }
+      
+      router.push('/');
+    }, 250);
+  };
 
   const formatAddress = (addr) => {
     if (!addr) return 'Select Location';
@@ -44,7 +91,7 @@ export default function Navbar({
           {/* Left Section: Logo */}
           <div className={styles.leftSection}>
             <div className={styles.logo} onClick={() => router.push('/')}>
-              <span className={styles.leafIcon}>🌿</span>
+              <img src="/logo.png" alt="Fresh Sabji Hub Logo" className={styles.logoImage} />
               <span className={styles.brandName}>Fresh Sabji Hub</span>
             </div>
           </div>
@@ -71,26 +118,66 @@ export default function Navbar({
                 type="text"
                 placeholder='Search "coke"'
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onClick={handleInputClick}
+                onChange={handleSearchChange}
+                onBlur={handleBlur}
               />
-              <Mic size={18} className={styles.micIcon} />
+              {searchQuery ? (
+                <X 
+                  size={18} 
+                  style={{ cursor: 'pointer', color: '#64748b' }} 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSearchQuery('');
+                    router.push('/');
+                  }}
+                />
+              ) : (
+                <Mic 
+                  size={18} 
+                  className={styles.micIcon} 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push('/search?startVoice=true');
+                  }}
+                />
+              )}
             </div>
           </div>
 
           {/* Right Section: Profile & Notifications */}
           <div className={styles.rightSection}>
             <div className={styles.bellWrapper}>
-              <button className={styles.bellBtn} onClick={() => router.push(isAuthenticated ? '/profile' : '/login')} aria-label="Notifications">
+              <button className={styles.bellBtn} onClick={() => router.push(isAuthenticated ? '/notifications' : '/login')} aria-label="Notifications">
                 <Bell size={20} />
-                <span className={styles.bellBadge}>2</span>
+                {isAuthenticated && unreadCount > 0 && (
+                  <span className={styles.bellBadge}>{unreadCount}</span>
+                )}
               </button>
             </div>
+            
+            {/* Profile Button (Icon circle only) */}
             <button 
-              className={`${styles.actionBtn} ${styles.profileBtn}`}
+              className={styles.profileCircleBtn}
               onClick={() => router.push(isAuthenticated ? '/profile' : '/login')}
+              aria-label="Profile"
             >
               <User size={18} />
-              <span className={styles.profileText}>{isAuthenticated ? 'Profile' : 'Login'}</span>
+            </button>
+
+            {/* Cart Button (Pill on desktop, hidden on mobile) */}
+            <button 
+              className={`${styles.actionBtn} ${styles.cartNavBtn} ${styles.desktopOnly}`}
+              onClick={() => router.push('/cart')}
+              style={{ position: 'relative' }}
+            >
+              <div className={styles.cartIconWrapper} style={{ display: 'flex', alignItems: 'center' }}>
+                <ShoppingCart size={18} />
+              </div>
+              <span className={styles.cartNavText}>Cart</span>
+              {cartTotalQuantity > 0 && (
+                <span className={styles.cartBadge} style={{ top: '-6px', right: '-6px', zIndex: 10 }}>{cartTotalQuantity}</span>
+              )}
             </button>
           </div>
 

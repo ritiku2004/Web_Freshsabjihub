@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Share2, Minus, Plus, Truck, Leaf, Shield } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft, Share2, Minus, Plus, Truck, Leaf, ShieldAlert, Check } from 'lucide-react';
 import { CartContext } from '../../../context/CartContext';
 import { AuthContext } from '../../../context/AuthContext';
 import { api } from '../../../services/api';
 import SafeImage from '../../../components/SafeImage';
 import Loader from '../../../components/Loader';
+import ProductCard from '../../../components/ProductCard';
 import styles from './page.module.css';
 
 export default function ProductDetailPage() {
@@ -16,58 +18,25 @@ export default function ProductDetailPage() {
   const { activeShop } = useContext(AuthContext);
   const { cartItems, addToCart, updateQuantity } = useContext(CartContext);
 
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // React Query: Fetch product info
+  const { data: product, isLoading, error } = useQuery({
+    queryKey: ['productDetails', id],
+    queryFn: () => api.getProductDetails(id),
+    enabled: !!id,
+  });
 
-  // Load product details
-  useEffect(() => {
-    async function loadProduct() {
-      try {
-        setLoading(true);
-        // Try getting specific details
-        const data = await api.getProductDetails(id);
-        if (data) {
-          setProduct(data);
-        }
-      } catch (err) {
-        console.error('Error fetching details from getProductDetails API, trying shop-inventory fallback', err);
-        // Fallback: try finding the product in all products of the active shop
-        if (activeShop?.id) {
-          try {
-            const shopProductsResponse = await api.getProducts({ shopId: activeShop.id, limit: 100 });
-            const foundProduct = shopProductsResponse?.products?.find(p => String(p.id) === String(id));
-            if (foundProduct) {
-              setProduct(foundProduct);
-              setLoading(false);
-              return;
-            }
-          } catch (shopErr) {
-            console.error('Error fetching shop inventory fallback', shopErr);
-          }
-        }
-        
-        // Final fallback to mock Aashirvaad Atta if it's the requested mockup item
-        setProduct({
-          id: id,
-          name: "Aashirvaad Atta (1 kg)",
-          price: 1440,
-          discountPrice: 1440,
-          unit: "1.00 kg",
-          image: "https://api.freshsabjihub.com/uploads/aashirvaad_atta.png", // fallback placeholder or similar
-          description: "Wheat flour",
-          stock: 50
-        });
-      } finally {
-        setLoading(false);
-      }
-    }
+  // React Query: Fetch related products from the same category
+  const { data: relatedData } = useQuery({
+    queryKey: ['relatedProducts', product?.categoryId, activeShop?.id],
+    queryFn: () => api.getProducts({ shopId: activeShop?.id, categoryId: product?.categoryId, limit: 5 }),
+    enabled: !!product?.categoryId && !!activeShop?.id,
+  });
 
-    if (id) {
-      loadProduct();
-    }
-  }, [id, activeShop?.id]);
+  const relatedProducts = (relatedData?.products || [])
+    .filter((p) => String(p.id) !== String(id))
+    .slice(0, 4);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className={styles.loadingWrapper}>
         <Loader text="Loading product details..." />
@@ -75,7 +44,7 @@ export default function ProductDetailPage() {
     );
   }
 
-  if (!product) {
+  if (error || !product) {
     return (
       <div className={styles.loadingWrapper}>
         <h2>Product not found</h2>
@@ -87,10 +56,16 @@ export default function ProductDetailPage() {
   // Find quantity in cart
   const cartItem = cartItems.find((item) => String(item.productId) === String(product.id));
   const cartQuantity = cartItem ? cartItem.quantity : 0;
-  const itemPrice = product.discountPrice || product.price;
-  const totalPrice = itemPrice * (cartQuantity || 1);
+
+  const price = Number(product.price) || 0;
+  const discountPrice = Number(product.discountPrice) || price;
+  const hasDiscount = discountPrice < price;
+  const discountPercent = hasDiscount ? Math.round(((price - discountPrice) / price) * 100) : 0;
+  const totalPrice = discountPrice * (cartQuantity || 1);
+  const isOutOfStock = product.stock <= 0 || product.is_available === 0 || product.isAvailable === false;
 
   const handleIncrement = () => {
+    if (isOutOfStock) return;
     if (cartQuantity === 0) {
       addToCart(product);
     } else {
@@ -134,7 +109,12 @@ export default function ProductDetailPage() {
         </button>
       </header>
 
-
+      {/* Breadcrumbs / Back navigation for Desktop */}
+      <div className={styles.desktopBackContainer}>
+        <button className={styles.desktopBackBtn} onClick={() => router.back()}>
+          <ArrowLeft size={16} /> Back to Products
+        </button>
+      </div>
 
       <div className={styles.mainContentGrid}>
         {/* Left Column: Image Section */}
@@ -145,6 +125,11 @@ export default function ProductDetailPage() {
               alt={product.name}
               className={styles.image}
             />
+            {isOutOfStock && (
+              <div className={styles.outOfStockOverlay}>
+                <span className={styles.outOfStockText}>OUT OF STOCK</span>
+              </div>
+            )}
           </div>
         </section>
 
@@ -153,11 +138,28 @@ export default function ProductDetailPage() {
           <section className={styles.detailsSection}>
             <h2 className={styles.title}>{product.name}</h2>
             <p className={styles.unit}>{product.unit}</p>
-            <div className={styles.price}>₹{itemPrice}</div>
 
-            {/* Desktop-only Inline Actions */}
+            <div className={styles.priceLayout}>
+              {hasDiscount ? (
+                <div className={styles.priceRow}>
+                  <span className={styles.discountPrice}>₹{discountPrice}</span>
+                  <span className={styles.originalPrice}>₹{price}</span>
+                  <span className={styles.savingsLabel}>{discountPercent}% OFF</span>
+                </div>
+              ) : (
+                <div className={styles.priceRow}>
+                  <span className={styles.discountPrice}>₹{price}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Desktop-only Actions */}
             <div className={styles.desktopActions}>
-              {cartQuantity === 0 ? (
+              {isOutOfStock ? (
+                <button className={styles.disabledButton} disabled>
+                  OUT OF STOCK
+                </button>
+              ) : cartQuantity === 0 ? (
                 <button className={styles.addButton} onClick={handleIncrement}>
                   ADD TO CART
                 </button>
@@ -176,16 +178,31 @@ export default function ProductDetailPage() {
           </section>
 
           {/* Product Description Details */}
-          <section className={styles.detailsSection2}>
-            <h3 className={styles.sectionHeading}>Product Details</h3>
-            <p className={styles.sectionContent}>
-              {product.description || "Fresh quality product sourced directly for you."}
-            </p>
-          </section>
+          {product.description && product.description.trim().length > 0 && (
+            <section className={styles.detailsSection2}>
+              <h3 className={styles.sectionHeading}>Product Details</h3>
+              <p className={styles.sectionContent}>{product.description}</p>
+            </section>
+          )}
 
-          {/* Why Choose FreshCart Section */}
+          {/* Technical Specifications */}
+          {product.features && product.features.length > 0 && (
+            <section className={styles.detailsSection2}>
+              <h3 className={styles.sectionHeading}>Specifications</h3>
+              <div className={styles.specsGrid}>
+                {product.features.map((feature, idx) => (
+                  <div key={idx} className={styles.specRow}>
+                    <span className={styles.specName}>{feature.feature_name}</span>
+                    <span className={styles.specValue}>{feature.feature_value}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Why Choose FreshSabjiHub Section */}
           <section className={styles.whyChooseSection}>
-            <h3 className={styles.whyChooseHeading}>Why Choose FreshCart?</h3>
+            <h3 className={styles.whyChooseHeading}>Why Choose Fresh Sabji Hub?</h3>
             <div className={styles.featuresList}>
               <div className={styles.featureItem}>
                 <div className={styles.iconContainer}>
@@ -193,7 +210,7 @@ export default function ProductDetailPage() {
                 </div>
                 <div className={styles.featureTexts}>
                   <h4 className={styles.featureTitle}>Superfast Delivery</h4>
-                  <p className={styles.featureDesc}>Get items at your doorstep quickly.</p>
+                  <p className={styles.featureDesc}>Get fresh items at your doorstep within minutes.</p>
                 </div>
               </div>
 
@@ -209,7 +226,7 @@ export default function ProductDetailPage() {
 
               <div className={styles.featureItem}>
                 <div className={styles.iconContainer}>
-                  <Shield size={20} />
+                  <Check size={20} />
                 </div>
                 <div className={styles.featureTexts}>
                   <h4 className={styles.featureTitle}>Safe & Sealed Packaging</h4>
@@ -221,6 +238,18 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
+      {/* Product Suggestions List */}
+      {relatedProducts.length > 0 && (
+        <section className={styles.relatedSection}>
+          <h3 className={styles.relatedHeading}>You Might Also Like</h3>
+          <div className={styles.relatedGrid}>
+            {relatedProducts.map((prod) => (
+              <ProductCard key={prod.id} product={prod} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Mobile-only Sticky Footer */}
       <footer className={styles.stickyFooter}>
         <div className={styles.priceBlock}>
@@ -229,7 +258,9 @@ export default function ProductDetailPage() {
         </div>
 
         <div>
-          {cartQuantity === 0 ? (
+          {isOutOfStock ? (
+            <div className={styles.disabledStickyButton}>OUT OF STOCK</div>
+          ) : cartQuantity === 0 ? (
             <button className={styles.addButton} onClick={handleIncrement}>
               ADD
             </button>

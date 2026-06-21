@@ -23,7 +23,7 @@ import SafeImage from '../../components/SafeImage';
 import Loader from '../../components/Loader';
 import styles from './profile.module.css';
 
-const API_BASE_URL = 'https://api.freshsabjihub.com/api/v1';
+import { API_BASE_URL } from '../../services/api';
 
 const resolveAvatarUrl = (url) => {
   if (!url) return null;
