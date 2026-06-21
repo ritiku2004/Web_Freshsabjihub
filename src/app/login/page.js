@@ -77,7 +77,7 @@ export default function LoginPage() {
         email: `${phone}@freshsabjihub.com`,
         profile_picture_url: ''
       };
-      const mockToken = 'mock_jwt_token_' + Date.now();
+      const mockToken = 'mock_jwt_token_' + phone;
 
       // Update AuthContext session
       login(mockUser, mockToken);

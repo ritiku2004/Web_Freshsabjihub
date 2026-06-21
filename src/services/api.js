@@ -1,4 +1,6 @@
-const API_BASE_URL = 'https://api.freshsabjihub.com/api/v1';
+const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+  ? 'http://localhost:3000/api/v1'
+  : 'https://api.freshsabjihub.com/api/v1';
 
 export const api = {
   // Fetch promotional offer banners from Backend
@@ -174,6 +176,50 @@ export const api = {
       return await response.json();
     } catch (error) {
       console.error('Error in submitSupportQuery API:', error);
+      throw error;
+    }
+  },
+
+  // Create order on the Backend
+  createOrder: async (orderData, token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderData)
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || 'Failed to create order');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error in createOrder API:', error);
+      throw error;
+    }
+  },
+
+  // Verify payment on the Backend
+  verifyPayment: async (paymentData, token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/orders/verify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(paymentData)
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || 'Failed to verify payment');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error in verifyPayment API:', error);
       throw error;
     }
   },
