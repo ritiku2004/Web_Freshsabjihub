@@ -284,8 +284,8 @@
   background: white !important;
   color: #16a34a !important;
   border-radius: 50% !important;
-  width: 38px !important;
-  height: 38px !important;
+  width: 32px !important;
+  height: 32px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -296,6 +296,27 @@
 }
 
 .profileCircleBtn:hover {
+  background: #f0fdf4 !important;
+  transform: translateY(-1px);
+}
+
+.loginBtn {
+  background: white !important;
+  color: #16a34a !important;
+  border-radius: 20px !important;
+  padding: 8px 16px !important;
+  font-weight: 750 !important;
+  font-size: 13px !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.loginBtn:hover {
   background: #f0fdf4 !important;
   transform: translateY(-1px);
 }

@@ -7,39 +7,41 @@
 
 /* ----- Header ----- */
 .pageHeader {
-  background: #0f7643;
-  padding: 16px 20px;
+  background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%);
+  padding: 18px 20px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(21, 128, 61, 0.25);
 }
 
 .backBtn {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.15);
   border: none;
-  cursor: pointer;
-  color: white;
+  border-radius: 10px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
-  border-radius: 50%;
+  cursor: pointer;
+  color: white;
   transition: background 0.2s;
 }
 
 .backBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .pageTitle {
-  font-size: 19px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 800;
   color: white;
   margin: 0;
+  letter-spacing: -0.3px;
 }
 
 /* ----- Content Container ----- */

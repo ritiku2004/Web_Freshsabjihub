@@ -1,49 +1,60 @@
-.container {
+.aboutPage {
+  min-height: 100vh;
+  background: #f5f6f8;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.pageContent {
   max-width: 800px;
   margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+.contentCard {
   background: #ffffff;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  font-family: 'Plus Jakarta Sans', sans-serif;
   padding-bottom: 32px;
 }
 
-/* Header styled like app but premium web style */
-.header {
-  background: linear-gradient(135deg, #15803d, #16a34a);
-  padding: 24px;
+/* ----- Header ----- */
+.pageHeader {
+  background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%);
+  padding: 18px 20px;
   display: flex;
   align-items: center;
-  color: #ffffff;
-  position: relative;
+  gap: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(21, 128, 61, 0.25);
 }
 
-.backButton {
+.backBtn {
   background: rgba(255, 255, 255, 0.15);
   border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  border-radius: 10px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
   cursor: pointer;
-  transition: all 0.2s ease;
-  margin-right: 16px;
+  color: white;
+  transition: background 0.2s;
 }
 
-.backButton:hover {
+.backBtn:hover {
   background: rgba(255, 255, 255, 0.25);
-  transform: translateX(-2px);
 }
 
-.headerTitle {
-  font-size: 20px;
-  font-weight: 700;
+.pageTitle {
+  font-size: 18px;
+  font-weight: 800;
+  color: white;
   margin: 0;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
 }
 
 /* Hero Section */
@@ -300,7 +311,7 @@
 }
 
 @media (max-width: 640px) {
-  .container {
+  .contentCard {
     border-radius: 0;
     box-shadow: none;
   }
@@ -310,16 +321,10 @@
 }
 
 @media (min-width: 1025px) {
-  .header {
-    display: none;
-  }
   .footer {
     display: none;
   }
-  .container {
-    max-width: 800px;
-    margin: 40px auto;
-    background: #ffffff;
+  .contentCard {
     border-radius: 20px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
     border: 1px solid #f1f5f9;

@@ -68,11 +68,10 @@ function SearchContent() {
   }, [query, activeShop?.id]);
 
   const performSearch = async (searchTerm) => {
-    if (!activeShop?.id) return;
     setLoading(true);
     try {
       const data = await api.getProducts({ 
-        shopId: activeShop.id, 
+        shopId: activeShop?.id || null, 
         search: searchTerm, 
         limit: 20 
       });
@@ -135,7 +134,7 @@ function SearchContent() {
     };
 
     recognition.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
+      console.warn('Speech recognition error:', event.error);
       if (event.error === 'not-allowed') {
         setVoiceStatus('Microphone blocked. Please grant access.');
       } else {

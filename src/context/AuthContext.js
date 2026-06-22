@@ -56,8 +56,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [guestId, setGuestId] = useState(null);
-  const [addresses, setAddresses] = useState(DEFAULT_ADDRESSES);
-  const [activeAddress, setActiveAddress] = useState(DEFAULT_ADDRESSES[0]);
+  const [addresses, setAddresses] = useState([]);
+  const [activeAddress, setActiveAddress] = useState(null);
   const [activeShop, setActiveShop] = useState({
     id: 1,
     name: "Main Warehouse Noida",
@@ -161,13 +161,18 @@ export const AuthProvider = ({ children }) => {
       const storedAddress = localStorage.getItem('activeAddress');
       const storedAddresses = localStorage.getItem('addresses');
 
-      let loadedAddresses = DEFAULT_ADDRESSES;
+      let loadedAddresses = [];
       if (storedAddresses) {
         try {
           loadedAddresses = JSON.parse(storedAddresses);
-          setAddresses(loadedAddresses);
-        } catch (e) {}
+        } catch (e) {
+          loadedAddresses = DEFAULT_ADDRESSES;
+        }
+      } else {
+        loadedAddresses = DEFAULT_ADDRESSES;
+        localStorage.setItem('addresses', JSON.stringify(DEFAULT_ADDRESSES));
       }
+      setAddresses(loadedAddresses);
 
       if (storedToken && storedUser) {
         api.setToken(storedToken);
@@ -209,6 +214,8 @@ export const AuthProvider = ({ children }) => {
           } catch (e) {}
         } else if (loadedAddresses.length > 0) {
           updateLocationAndShop(loadedAddresses[0]);
+        } else {
+          updateLocationAndShop(null);
         }
       }
     }
@@ -236,34 +243,63 @@ export const AuthProvider = ({ children }) => {
         }
       }
 
-      // Merge temporary guest addresses from localStorage
-      const storedAddresses = localStorage.getItem('addresses');
-      if (storedAddresses) {
-        try {
-          const localAddrs = JSON.parse(storedAddresses);
-          const guestAddrs = localAddrs.filter(addr => String(addr.id).startsWith('addr_'));
-          
-          if (guestAddrs.length > 0) {
-            for (const guestAddr of guestAddrs) {
-              try {
-                const payload = mapFrontendAddressToBackend(guestAddr);
-                await api.saveAddress(payload);
-              } catch (addrErr) {
-                console.error('Failed to merge guest address:', addrErr);
-              }
-            }
+      // Merge temporary guest addresses (excluding default ones addr1 and addr2)
+      const guestAddresses = addresses.filter(addr => 
+        addr.id && 
+        String(addr.id).startsWith('addr_') && 
+        addr.id !== 'addr1' && 
+        addr.id !== 'addr2'
+      );
+
+      if (guestAddresses.length > 0) {
+        console.log('[AuthContext] Merging guest addresses to backend, count:', guestAddresses.length);
+        for (const guestAddr of guestAddresses) {
+          try {
+            await api.saveAddress({
+              title: guestAddr.type || 'Other',
+              address_line1: `${guestAddr.flatNo || ''}||${guestAddr.addressLine || ''}`,
+              address_line2: guestAddr.landmark || '',
+              city: 'City',
+              state: 'State',
+              zipcode: guestAddr.zipcode,
+              latitude: guestAddr.latitude,
+              longitude: guestAddr.longitude,
+              is_default: false,
+              receiver_name: guestAddr.receiverName || userData.first_name || 'User',
+              receiver_mobile: guestAddr.receiverMobile || userData.phone_number || ''
+            });
+          } catch (addrErr) {
+            console.error('[AuthContext] Failed to merge guest address:', addrErr);
           }
-        } catch (e) {}
+        }
       }
 
       // Fetch all backend addresses after merge
       try {
         const freshAddrs = await api.fetchAddresses();
-        const mapped = freshAddrs.map(mapBackendAddress);
-        setAddresses(mapped);
-        localStorage.setItem('addresses', JSON.stringify(mapped));
-        if (mapped.length > 0) {
-          updateLocationAndShop(mapped[0]);
+        if (freshAddrs && freshAddrs.length > 0) {
+          const mapped = freshAddrs.map(b => {
+            const parts = b.address_line1 ? b.address_line1.split('||') : [];
+            const flatNo = parts[0] || b.address_line1;
+            const addressLine = parts.length > 1 ? parts[1] : b.address_line1;
+            return {
+              id: b.id.toString(),
+              type: b.title || 'Home',
+              flatNo: flatNo,
+              addressLine: addressLine,
+              landmark: b.address_line2 || '',
+              receiverName: b.receiver_name || userData.first_name || 'User',
+              receiverMobile: b.receiver_mobile || userData.phone_number || '',
+              zipcode: b.zipcode,
+              latitude: b.latitude,
+              longitude: b.longitude,
+            };
+          });
+          setAddresses(mapped);
+          localStorage.setItem('addresses', JSON.stringify(mapped));
+          if (mapped.length > 0) {
+            updateLocationAndShop(mapped[0]);
+          }
         }
       } catch (e) {
         console.error('Failed to fetch merged addresses:', e);
@@ -301,79 +337,81 @@ export const AuthProvider = ({ children }) => {
   };
 
   const saveAddress = async (newAddress) => {
-    if (isAuthenticated) {
-      try {
-        const payload = mapFrontendAddressToBackend(newAddress);
-        const saved = await api.saveAddress(payload);
-        const mappedSaved = mapBackendAddress(saved);
-        
-        // Enforce at most one of each type in local state to match mobile app behavior
-        const otherAddresses = addresses.filter(addr => addr.type !== mappedSaved.type && addr.id !== mappedSaved.id);
-        const updated = [...otherAddresses, mappedSaved];
-        
-        setAddresses(updated);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('addresses', JSON.stringify(updated));
-        }
-        if (!activeAddress || activeAddress.id === newAddress.id || activeAddress.type === mappedSaved.type) {
-          updateLocationAndShop(mappedSaved);
-        }
-      } catch (e) {
-        alert(e.message || 'Failed to save address to backend.');
-      }
-    } else {
-      // Offline / guest mode address saving
-      let savedAddr;
-      if (newAddress.id) {
-        savedAddr = newAddress;
-      } else {
-        savedAddr = {
-          ...newAddress,
-          id: 'addr_' + Date.now(),
-        };
-      }
+    try {
+      let savedAddr = newAddress;
+      let isNew = !newAddress.id;
       
-      // Enforce at most one of each type in local state to match mobile app behavior
+      if (isAuthenticated) {
+        try {
+          const backendIdObj = await api.saveAddress({
+            title: newAddress.type || 'Other',
+            address_line1: `${newAddress.flatNo || ''}||${newAddress.addressLine || ''}`,
+            address_line2: newAddress.landmark || '',
+            city: 'City',
+            state: 'State',
+            zipcode: newAddress.zipcode,
+            latitude: newAddress.latitude,
+            longitude: newAddress.longitude,
+            is_default: false,
+            receiver_name: newAddress.receiverName,
+            receiver_mobile: newAddress.receiverMobile
+          });
+          savedAddr = { ...newAddress, id: backendIdObj.id.toString() };
+          
+          const existingWithId = addresses.find(addr => addr.id === savedAddr.id);
+          const existingWithType = addresses.find(addr => addr.type === savedAddr.type);
+          if (existingWithId || existingWithType) {
+            isNew = false;
+          }
+        } catch (backendErr) {
+          console.log('Failed to sync address to backend, saving locally only', backendErr);
+          if (!savedAddr.id) {
+            savedAddr.id = 'addr_' + Math.floor(Math.random() * 1000000);
+          }
+        }
+      } else if (!savedAddr.id) {
+        savedAddr.id = 'addr_' + Math.floor(Math.random() * 1000000);
+      }
+
+      // Enforce at most one of each type in local addresses
       const otherAddresses = addresses.filter(addr => addr.type !== savedAddr.type && addr.id !== savedAddr.id);
       const updated = [...otherAddresses, savedAddr];
-
+      
       setAddresses(updated);
       if (typeof window !== 'undefined') {
         localStorage.setItem('addresses', JSON.stringify(updated));
       }
-      if (!activeAddress || activeAddress.id === newAddress.id || activeAddress.type === savedAddr.type) {
-        updateLocationAndShop(savedAddr);
+
+      if (isNew || !activeAddress || activeAddress.id === savedAddr.id || activeAddress.type === savedAddr.type) {
+        const addressToActivate = savedAddr;
+        await updateLocationAndShop(addressToActivate);
       }
+    } catch (e) {
+      console.error(e);
     }
   };
 
   const deleteAddress = async (id) => {
-    const stringId = String(id);
-    if (isAuthenticated && !stringId.startsWith('addr_')) {
-      try {
-        await api.deleteAddress(id);
-        const updated = addresses.filter((addr) => String(addr.id) !== stringId);
-        setAddresses(updated);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('addresses', JSON.stringify(updated));
+    try {
+      if (isAuthenticated) {
+        try {
+          await api.deleteAddress(id);
+        } catch (backendErr) {
+          console.log('Failed to delete address from backend', backendErr);
         }
-        if (activeAddress && String(activeAddress.id) === stringId) {
-          const nextActive = updated.length > 0 ? updated[0] : null;
-          updateLocationAndShop(nextActive);
-        }
-      } catch (e) {
-        alert(e.message || 'Failed to delete address.');
       }
-    } else {
-      const updated = addresses.filter((addr) => String(addr.id) !== stringId);
+      const updated = addresses.filter((addr) => String(addr.id) !== String(id));
       setAddresses(updated);
       if (typeof window !== 'undefined') {
         localStorage.setItem('addresses', JSON.stringify(updated));
       }
-      if (activeAddress && String(activeAddress.id) === stringId) {
+
+      if (activeAddress && String(activeAddress.id) === String(id)) {
         const nextActive = updated.length > 0 ? updated[0] : null;
-        updateLocationAndShop(nextActive);
+        await updateLocationAndShop(nextActive);
       }
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -396,32 +434,60 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (e) {
       console.error('Failed to refresh profile:', e);
+      // Auto-logout if token is expired, unauthorized, or invalid
+      const errText = String(e.message || '').toLowerCase();
+      if (errText.includes('unauthorized') || errText.includes('failed to fetch profile') || errText.includes('jwt') || errText.includes('token')) {
+        console.warn('Logging out due to invalid or expired token.');
+        logout();
+      }
     }
   };
 
   const refreshAddresses = async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !user) return;
     try {
       const backendAddresses = await api.fetchAddresses();
-      if (backendAddresses) {
-        const mappedAddresses = backendAddresses.map(mapBackendAddress);
+      if (backendAddresses && backendAddresses.length > 0) {
+        const mappedAddresses = backendAddresses.map(b => {
+          const parts = b.address_line1 ? b.address_line1.split('||') : [];
+          const flatNo = parts[0] || b.address_line1;
+          const addressLine = parts.length > 1 ? parts[1] : b.address_line1;
+          return {
+            id: b.id.toString(),
+            type: b.title || 'Home',
+            flatNo: flatNo,
+            addressLine: addressLine,
+            landmark: b.address_line2 || '',
+            receiverName: b.receiver_name || user.first_name || 'User',
+            receiverMobile: b.receiver_mobile || user.phone_number || '',
+            zipcode: b.zipcode,
+            latitude: b.latitude,
+            longitude: b.longitude,
+          };
+        });
         setAddresses(mappedAddresses);
         if (typeof window !== 'undefined') {
           localStorage.setItem('addresses', JSON.stringify(mappedAddresses));
         }
+        
+        // Also update activeAddress in case it was modified or deleted
         if (activeAddress) {
           const stillExists = mappedAddresses.find(a => String(a.id) === String(activeAddress.id));
           if (stillExists) {
             updateLocationAndShop(stillExists);
-          } else if (mappedAddresses.length > 0) {
-            updateLocationAndShop(mappedAddresses[0]);
           } else {
-            updateLocationAndShop(null);
+            updateLocationAndShop(mappedAddresses[0]);
           }
         }
       }
     } catch (err) {
       console.error('Failed to refresh addresses:', err);
+      // Auto-logout if token is expired or unauthorized
+      const errText = String(err.message || '').toLowerCase();
+      if (errText.includes('unauthorized') || errText.includes('failed to fetch addresses') || errText.includes('jwt') || errText.includes('token')) {
+        console.warn('Logging out due to invalid or expired token during address refresh.');
+        logout();
+      }
     }
   };
 

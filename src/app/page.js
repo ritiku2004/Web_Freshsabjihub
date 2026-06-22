@@ -46,7 +46,7 @@ function ProductRow({ cat, router, index }) {
             className={styles.viewAllBtn}
             onClick={() => router.push(`/categories?cat=${cat.id}`)}
           >
-            View All <ArrowRight size={14} strokeWidth={2.5} />
+            See All <ArrowRight size={14} strokeWidth={2.5} />
           </button>
         </div>
       </div>

@@ -8,6 +8,7 @@ import { CartContext } from '../context/CartContext';
 import { useNotifications } from '../context/NotificationContext';
 import LocationModal from './LocationModal';
 import styles from './Navbar.module.css';
+import { API_BASE_URL } from '../services/api';
 
 export default function Navbar({ 
   categoryTitle = 'All Categories', 
@@ -23,7 +24,7 @@ export default function Navbar({
   else if (pathname.startsWith('/categories')) activeTab = 'categories';
   else if (pathname.startsWith('/orders')) activeTab = 'orders';
 
-  const { activeAddress, deliveryETA, serviceAvailable, isAuthenticated } = useContext(AuthContext);
+  const { activeAddress, deliveryETA, serviceAvailable, isAuthenticated, user } = useContext(AuthContext);
   const { cartTotalQuantity } = useContext(CartContext);
   const { unreadCount } = useNotifications();
   const [isLocationOpen, setIsLocationOpen] = useState(false);
@@ -156,14 +157,77 @@ export default function Navbar({
               </button>
             </div>
             
-            {/* Profile Button (Icon circle only) */}
-            <button 
-              className={styles.profileCircleBtn}
-              onClick={() => router.push(isAuthenticated ? '/profile' : '/login')}
-              aria-label="Profile"
-            >
-              <User size={18} />
-            </button>
+            {/* Profile Button (Icon/Avatar if logged in, Login button otherwise) */}
+            {isAuthenticated ? (
+              (() => {
+                const displayName = user?.name || (user?.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : '') || 'Guest User';
+                const userInitials = displayName
+                  ? displayName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+                  : 'U';
+                
+                const avatarUri = user?.profile_picture_url && (
+                  user.profile_picture_url.startsWith('/') || 
+                  user.profile_picture_url.startsWith('uploads/') || 
+                  user.profile_picture_url.startsWith('http://') || 
+                  user.profile_picture_url.startsWith('https://')
+                ) ? (
+                  user.profile_picture_url.startsWith('http://') || user.profile_picture_url.startsWith('https://')
+                    ? user.profile_picture_url
+                    : `${API_BASE_URL.replace('/api/v1', '')}/${user.profile_picture_url.replace(/^\//, '')}`
+                ) : null;
+
+                const PRESET_AVATARS = [
+                  { emoji: '🍅', color: '#FEE2E2' },
+                  { emoji: '🥦', color: '#D1FAE5' },
+                  { emoji: '🥕', color: '#FFEDD5' },
+                  { emoji: '🥑', color: '#E0F2FE' },
+                  { emoji: '🍓', color: '#FFF1F2' },
+                  { emoji: '🍋', color: '#FEF9C3' },
+                  { emoji: '🍇', color: '#F3E8FF' },
+                  { emoji: '🍉', color: '#ECFDF5' },
+                  { emoji: '🍎', color: '#FEF2F2' },
+                ];
+
+                const hasEmojiAvatar = user?.profile_picture_url && PRESET_AVATARS.some((a) => a.emoji === user.profile_picture_url);
+                const activeAvatarColor = user?.profile_picture_url
+                  ? PRESET_AVATARS.find((a) => a.emoji === user.profile_picture_url)?.color || '#10b981'
+                  : '#10b981';
+
+                return (
+                  <button 
+                    className={styles.profileCircleBtn}
+                    onClick={() => router.push('/profile')}
+                    aria-label="Profile"
+                    style={{ 
+                      backgroundColor: (hasEmojiAvatar || !avatarUri) ? activeAvatarColor : 'white',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    {avatarUri ? (
+                      <img
+                        src={avatarUri}
+                        alt={displayName}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : hasEmojiAvatar ? (
+                      <span style={{ fontSize: '15px', display: 'block', lineHeight: '1' }}>{user.profile_picture_url}</span>
+                    ) : (
+                      <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'white' }}>{userInitials}</span>
+                    )}
+                  </button>
+                );
+              })()
+            ) : (
+              <button 
+                className={styles.loginBtn}
+                onClick={() => router.push('/login')}
+              >
+                Login
+              </button>
+            )}
 
             {/* Cart Button (Pill on desktop, hidden on mobile) */}
             <button 

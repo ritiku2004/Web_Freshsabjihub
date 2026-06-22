@@ -51,7 +51,6 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1.2px;
-  color: white !important;
 }
 
 .title {
@@ -60,14 +59,12 @@
   line-height: 1.15;
   letter-spacing: -0.7px;
   margin: 2px 0;
-  color: white !important;
 }
 
 .desc {
   font-size: 18px;
   line-height: 1.5;
   font-weight: 500;
-  color: white !important;
 }
 
 .shopNowBtn {

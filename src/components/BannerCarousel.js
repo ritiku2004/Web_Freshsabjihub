@@ -41,9 +41,9 @@ export default function BannerCarousel({ banners = [] }) {
         style={{ transform: `translateX(-${activeIndex * 100}%)` }}
       >
         {banners.map((banner, index) => {
-          const bg = banner.backgroundColor || '#E8F5E9';
-          const textCol = banner.textColor || '#2E7D32';
           const resolvedImage = banner.image ? (banner.image.startsWith('/') && !banner.image.startsWith('//') ? (banner.image.startsWith('/uploads/') ? `https://api.freshsabjihub.com${banner.image}` : banner.image) : (banner.image.startsWith('uploads/') ? `https://api.freshsabjihub.com/${banner.image}` : banner.image)) : '';
+          const bg = banner.backgroundColor || '#E8F5E9';
+          const textCol = banner.textColor || (resolvedImage ? '#ffffff' : '#2E7D32');
 
           return (
             <div

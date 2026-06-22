@@ -74,7 +74,7 @@ export default function TermsPage() {
       {/* Header */}
       <div className={styles.pageHeader}>
         <button className={styles.backBtn} onClick={() => router.back()}>
-          <ArrowLeft size={22} />
+          <ArrowLeft size={20} />
         </button>
         <h1 className={styles.pageTitle}>Terms & Conditions</h1>
       </div>

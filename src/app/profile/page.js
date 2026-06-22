@@ -241,7 +241,7 @@ export default function ProfilePage() {
       {/* Profile Banner */}
       <div className={styles.pageHeader}>
         <button className={styles.backBtn} onClick={() => router.back()} aria-label="Go back">
-          <ArrowLeft size={22} />
+          <ArrowLeft size={20} />
         </button>
         <h1 className={styles.pageTitle}>My Profile</h1>
       </div>

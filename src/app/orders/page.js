@@ -12,7 +12,7 @@ import styles from '../page.module.css';
 
 export default function OrdersPage() {
   const router = useRouter();
-  const { activeAddress, serviceAvailable, isAuthenticated } = useContext(AuthContext);
+  const { activeAddress, serviceAvailable, isAuthenticated, user } = useContext(AuthContext);
   const { addToCart } = useContext(CartContext);
 
   const [pastOrders, setPastOrders] = useState([]);

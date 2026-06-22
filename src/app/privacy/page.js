@@ -15,11 +15,11 @@ export default function PrivacyPage() {
   return (
     <div className={styles.container}>
       {/* Header */}
-      <div className={styles.header}>
-        <button onClick={() => router.back()} className={styles.backButton} aria-label="Go back">
-          <ArrowLeft size={22} />
+      <div className={styles.pageHeader}>
+        <button onClick={() => router.back()} className={styles.backBtn} aria-label="Go back">
+          <ArrowLeft size={20} />
         </button>
-        <h1 className={styles.headerTitle}>Privacy Policy</h1>
+        <h1 className={styles.pageTitle}>Privacy Policy</h1>
       </div>
 
       <div className={styles.scrollContainer}>

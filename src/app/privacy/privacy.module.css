@@ -6,41 +6,42 @@
 }
 
 /* ----- Header ----- */
-.header {
-  background: #0f7643;
-  padding: 16px 20px;
+.pageHeader {
+  background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%);
+  padding: 18px 20px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  color: #ffffff;
+  box-shadow: 0 2px 12px rgba(21, 128, 61, 0.25);
 }
 
-.backButton {
-  background: transparent;
+.backBtn {
+  background: rgba(255, 255, 255, 0.15);
   border: none;
-  cursor: pointer;
-  color: white;
+  border-radius: 10px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
-  border-radius: 50%;
+  cursor: pointer;
+  color: white;
   transition: background 0.2s;
 }
 
-.backButton:hover {
-  background: rgba(255, 255, 255, 0.1);
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
-.headerTitle {
-  font-size: 19px;
-  font-weight: 600;
+.pageTitle {
+  font-size: 18px;
+  font-weight: 800;
   color: white;
   margin: 0;
+  letter-spacing: -0.3px;
 }
 
 /* ----- Scroll Container (Content Wrapper) ----- */
@@ -203,11 +204,11 @@
     padding: 16px 12px 60px;
   }
   
-  .header {
+  .pageHeader {
     padding: 14px 16px;
   }
   
-  .headerTitle {
+  .pageTitle {
     font-size: 17px;
   }
   

@@ -1,21 +1,9 @@
 export const getApiBaseUrl = () => {
   if (typeof window === 'undefined') {
-    if (process.env.NODE_ENV === 'production') {
-      return 'https://api.freshsabjihub.com/api/v1';
-    }
-    return 'http://localhost:5000/api/v1';
+    return 'http://localhost:3000/api/v1';
   }
   const hostname = window.location.hostname;
-  if (
-    hostname === 'localhost' ||
-    hostname === '127.0.0.1' ||
-    hostname.startsWith('10.') ||
-    hostname.startsWith('192.168.') ||
-    hostname.startsWith('172.')
-  ) {
-    return `http://${hostname}:5000/api/v1`;
-  }
-  return 'https://api.freshsabjihub.com/api/v1';
+  return `http://${hostname}:3000/api/v1`;
 };
 
 export const API_BASE_URL = getApiBaseUrl();
@@ -127,26 +115,31 @@ export const api = {
     limit = 100, // Default higher limit to fetch all products for horizontal scrollers
   } = {}) => {
     try {
-      if (!shopId) return { products: [], hasMore: false, totalCount: 0 };
+      const url = shopId 
+        ? `${API_BASE_URL}/user/shop-inventory/${shopId}`
+        : `${API_BASE_URL}/user/catalog/products`;
 
-      const response = await fetch(`${API_BASE_URL}/user/shop-inventory/${shopId}`);
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch products');
       const responseData = await response.json();
       let filtered = responseData.data || [];
 
-      // Map backend shop_products schema to the frontend expectations
-      filtered = filtered.map(p => ({
-        ...p,
-        id: String(p.product_id || p.id),
-        name: p.product_name || p.name,
-        categoryId: String(p.category_id),
-        image: p.image_url,
-        price: Number(p.price) || 0,
-        discountPrice: p.discount_percentage ? Number(p.price) - (Number(p.price) * (Number(p.discount_percentage) / 100)) : Number(p.price),
-        unit: `${p.quantity} ${p.quantity_type}`,
-        stock: p.is_available ? 50 : 0,
-        rating: 4.5,
-      }));
+      // Map backend shop_products or products schema to the frontend expectations
+      filtered = filtered.map(p => {
+        const basePrice = Number(p.price !== undefined ? p.price : p.mrp_price) || 0;
+        return {
+          ...p,
+          id: String(p.product_id || p.id),
+          name: p.product_name || p.name,
+          categoryId: String(p.category_id),
+          image: p.image_url,
+          price: basePrice,
+          discountPrice: p.discount_percentage ? basePrice - (basePrice * (Number(p.discount_percentage) / 100)) : basePrice,
+          unit: `${p.quantity} ${p.quantity_type}`,
+          stock: p.is_available !== false ? 50 : 0,
+          rating: 4.5,
+        };
+      });
 
       // Filter by Category
       if (categoryId) {
