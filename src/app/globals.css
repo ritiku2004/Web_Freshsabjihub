@@ -64,5 +64,29 @@ a {
     width: 100% !important;
   }
 }
+/* Custom Scrollbar Styles */
+/* For Webkit Browsers (Chrome, Safari, Edge, Opera) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
 
+::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
 
+::-webkit-scrollbar-thumb {
+  background: #0f7643;
+  border-radius: 6px;
+  border: 2px solid #f8fafc;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0b5832;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #0f7643 #f8fafc;
+}

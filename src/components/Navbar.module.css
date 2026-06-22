@@ -304,7 +304,8 @@
   background: white !important;
   color: #16a34a !important;
   border-radius: 20px !important;
-  padding: 8px 16px !important;
+  height: 38px !important;
+  padding: 0 16px !important;
   font-weight: 750 !important;
   font-size: 13px !important;
   border: none !important;

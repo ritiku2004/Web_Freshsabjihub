@@ -2,7 +2,7 @@
 
 import React, { useContext, useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, MapPin, AlertTriangle, CheckCircle, Shield, ShoppingBag, CreditCard, Wallet } from 'lucide-react';
+import { MapPin, AlertTriangle, CheckCircle, Shield, ShoppingBag, CreditCard, Wallet } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 import { CartContext } from '../../context/CartContext';
 import SafeImage from '../../components/SafeImage';
@@ -41,9 +41,7 @@ function CheckoutContent() {
   const [showOrderSuccess, setShowOrderSuccess] = useState(false);
   const [latestOrderNo, setLatestOrderNo] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('cod');
-  const [showMockPayment, setShowMockPayment] = useState(false);
-  const [tempOrderData, setTempOrderData] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('prepaid');
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -72,18 +70,91 @@ function CheckoutContent() {
         discountAmount: cartSavings,
         handlingFee: handlingFee,
         deliveryFee: deliveryFee,
-        paymentMethod: 'cod' // Always pass 'cod' to local backend to record order successfully
+        paymentMethod: paymentMethod === 'prepaid' ? 'prepaid' : 'cod',
       };
 
       const result = await api.createOrder(orderPayload, token);
       const rzpData = result.data;
 
       if (paymentMethod === 'prepaid') {
-        // Intercept prepaid to show the frontend simulator modal
-        setTempOrderData(rzpData);
-        setShowMockPayment(true);
-        setIsProcessing(false);
-        return;
+        // Load the official Razorpay SDK
+        const loaded = await loadRazorpayScript();
+        if (!loaded) {
+          alert('Failed to load Razorpay. Please check your internet connection and try again.');
+          setIsProcessing(false);
+          return;
+        }
+
+        const options = {
+          key: rzpData.razorpayKeyId,
+          amount: Math.round(finalTotal * 100), // in paise
+          currency: 'INR',
+          name: 'Fresh Sabji Hub',
+          description: `Order #${rzpData.orderNumber}`,
+          order_id: rzpData.razorpayOrderId,
+          prefill: {
+            name: user?.name || user?.first_name || '',
+            email: user?.email || '',
+            contact: user?.mobile || '',
+          },
+          theme: {
+            color: '#0f7643',
+          },
+          handler: async (response) => {
+            // Payment succeeded — verify with backend
+            try {
+              await api.verifyPayment({
+                orderId: rzpData.orderId,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpaySignature: response.razorpay_signature,
+              }, token);
+
+              const newOrder = {
+                id: rzpData.orderId,
+                orderNumber: rzpData.orderNumber,
+                date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+                status: 'Processing',
+                paymentStatus: 'Paid',
+                items: cartItems.map(item => ({
+                  productId: item.productId,
+                  name: item.name,
+                  quantity: item.quantity,
+                  price: item.discountPrice,
+                })),
+                totalAmount: finalTotal,
+              };
+
+              if (typeof window !== 'undefined') {
+                const savedOrders = JSON.parse(localStorage.getItem('pastOrders') || '[]');
+                localStorage.setItem('pastOrders', JSON.stringify([newOrder, ...savedOrders]));
+              }
+
+              clearCart();
+              setLatestOrderNo(rzpData.orderNumber);
+              setShowOrderSuccess(true);
+            } catch (verifyErr) {
+              console.error('Payment verification failed:', verifyErr);
+              alert('Payment was received but verification failed. Please contact support with your order number: ' + rzpData.orderNumber);
+            }
+            setIsProcessing(false);
+          },
+          modal: {
+            ondismiss: () => {
+              alert('Payment cancelled. Your order has not been confirmed.');
+              setIsProcessing(false);
+            },
+          },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', (response) => {
+          console.error('Razorpay payment failed:', response.error);
+          alert(`Payment failed: ${response.error.description}. Please try again.`);
+          setIsProcessing(false);
+        });
+        rzp.open();
+        return; // Don't reset isProcessing here — handlers do it
       }
 
       // Standard Cash on Delivery confirmation
@@ -96,9 +167,9 @@ function CheckoutContent() {
           productId: item.productId,
           name: item.name,
           quantity: item.quantity,
-          price: item.discountPrice
+          price: item.discountPrice,
         })),
-        totalAmount: finalTotal
+        totalAmount: finalTotal,
       };
 
       if (typeof window !== 'undefined') {
@@ -113,41 +184,10 @@ function CheckoutContent() {
       console.error(err);
       alert(err.message || 'An error occurred while placing the order.');
     } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleConfirmMockPayment = (success) => {
-    if (success) {
-      if (!tempOrderData) return;
-      const newOrder = {
-        id: tempOrderData.orderId,
-        orderNumber: tempOrderData.orderNumber,
-        date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-        status: 'Processing',
-        paymentStatus: 'Paid',
-        items: cartItems.map(item => ({
-          productId: item.productId,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.discountPrice
-        })),
-        totalAmount: finalTotal
-      };
-
-      if (typeof window !== 'undefined') {
-        const savedOrders = JSON.parse(localStorage.getItem('pastOrders') || '[]');
-        localStorage.setItem('pastOrders', JSON.stringify([newOrder, ...savedOrders]));
+      if (paymentMethod !== 'prepaid') {
+        setIsProcessing(false);
       }
-
-      clearCart();
-      setLatestOrderNo(tempOrderData.orderNumber);
-      setShowOrderSuccess(true);
-    } else {
-      alert('Payment simulation: Transaction failed or cancelled.');
     }
-    setShowMockPayment(false);
-    setTempOrderData(null);
   };
 
   if (loading || (!isAuthenticated && !showOrderSuccess)) {
@@ -220,14 +260,14 @@ function CheckoutContent() {
               </div>
             </div>
             <div className={styles.paymentOptions}>
-              <div 
+              <div
                 className={`${styles.paymentOption} ${paymentMethod === 'cod' ? styles.paymentOptionActive : ''}`}
                 onClick={() => setPaymentMethod('cod')}
               >
-                <input 
-                  type="radio" 
-                  name="paymentMethod" 
-                  checked={paymentMethod === 'cod'} 
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  checked={paymentMethod === 'cod'}
                   onChange={() => setPaymentMethod('cod')}
                   className={styles.radioInput}
                 />
@@ -238,14 +278,14 @@ function CheckoutContent() {
                 </div>
               </div>
 
-              <div 
+              <div
                 className={`${styles.paymentOption} ${paymentMethod === 'prepaid' ? styles.paymentOptionActive : ''}`}
                 onClick={() => setPaymentMethod('prepaid')}
               >
-                <input 
-                  type="radio" 
-                  name="paymentMethod" 
-                  checked={paymentMethod === 'prepaid'} 
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  checked={paymentMethod === 'prepaid'}
                   onChange={() => setPaymentMethod('prepaid')}
                   className={styles.radioInput}
                 />
@@ -287,7 +327,7 @@ function CheckoutContent() {
         <div className={styles.rightColumn}>
           <div className={styles.billingCard}>
             <h3 className={styles.billingHeader}>Bill Details</h3>
-            
+
             <div className={styles.billingRow}>
               <span>Items Subtotal</span>
               <span>₹{cartSubtotal}</span>
@@ -308,7 +348,7 @@ function CheckoutContent() {
             </div>
 
             <div className={styles.billingRow}>
-              <span>Handling & Packaging Charges</span>
+              <span>Handling &amp; Packaging Charges</span>
               <span>₹{handlingFee}</span>
             </div>
 
@@ -344,39 +384,6 @@ function CheckoutContent() {
           </div>
         </div>
       </div>
-
-      {/* Premium Mock Payment Simulator Overlay */}
-      {showMockPayment && (
-        <div className={styles.simulatorOverlay}>
-          <div className={styles.simulatorCard}>
-            <h3 className={styles.simulatorTitle}>💳 Razorpay Payment Simulator</h3>
-            <p className={styles.simulatorText}>
-              Prepaid checkout simulation mode is active. Choose a result status to simulate the transaction.
-            </p>
-            <div className={styles.simulatorAmount}>₹{finalTotal}</div>
-            <div className={styles.simulatorActions}>
-              <button 
-                className={styles.simulatorBtnSuccess}
-                onClick={() => handleConfirmMockPayment(true)}
-              >
-                🟢 Simulate Success
-              </button>
-              <button 
-                className={styles.simulatorBtnFail}
-                onClick={() => handleConfirmMockPayment(false)}
-              >
-                🔴 Simulate Failure
-              </button>
-              <button 
-                className={styles.simulatorBtnCancel}
-                onClick={() => setShowMockPayment(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -384,7 +391,7 @@ function CheckoutContent() {
 export default function CheckoutPage() {
   return (
     <Suspense fallback={
-      <div className={styles.loadingContainer || ''} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '16px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '16px' }}>
         <p style={{ fontSize: '16px', color: '#64748b' }}>Loading checkout...</p>
       </div>
     }>

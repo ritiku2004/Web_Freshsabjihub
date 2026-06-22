@@ -6,6 +6,7 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import AppDownloadModal from './AppDownloadModal';
 import SplashScreen from './SplashScreen';
+import FloatingCart from './FloatingCart';
 import styles from '../app/page.module.css';
 
 export default function ConditionalLayout({ children }) {
@@ -20,11 +21,13 @@ export default function ConditionalLayout({ children }) {
       {hideLayout ? (
         <main style={{ width: '100%', minHeight: '100vh', backgroundColor: '#ffffff' }}>
           <AppDownloadModal />
+          <FloatingCart />
           {children}
         </main>
       ) : (
         <div className={`${styles.mainContainer} ${isStaticAppPage ? 'about-page-layout' : ''} ${isProductPage ? 'product-page-layout' : ''}`}>
           <AppDownloadModal />
+          <FloatingCart />
           {!isProductPage && (
             <div className="web-navbar-wrapper">
               <React.Suspense fallback={<div style={{ height: '70px', backgroundColor: '#0f7643' }} />}>
