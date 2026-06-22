@@ -1,9 +1,9 @@
 export const getApiBaseUrl = () => {
   if (typeof window === 'undefined') {
-    return 'http://localhost:5000/api/v1';
+    return 'http://localhost:3000/api/v1';
   }
   const hostname = window.location.hostname;
-  return `http://${hostname}:5000/api/v1`;
+  return `http://${hostname}:3000/api/v1`;
 };
 
 export const API_BASE_URL = getApiBaseUrl();
