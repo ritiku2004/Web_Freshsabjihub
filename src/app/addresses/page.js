@@ -399,95 +399,107 @@ export default function AddressesPage() {
           </h3>
 
           <div className={styles.formCard}>
-            {/* Type Pills */}
-            <div className={styles.typePillRow}>
-              {ADDRESS_TYPES.map((type) => (
-                <button
-                  key={type}
-                  className={`${styles.typePill} ${addressType === type ? styles.typePillActive : ''}`}
-                  onClick={() => setAddressType(type)}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
-
-            {/* Form Fields */}
-            <div className={styles.formGrid}>
-              <div className={styles.formGroup}>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  placeholder="Receiver's Full Name"
-                  value={receiverName}
-                  onChange={(e) => setReceiverName(e.target.value)}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <input
-                  type="tel"
-                  className={styles.formInput}
-                  placeholder="Receiver's Mobile Number"
-                  value={receiverMobile}
-                  onChange={(e) => setReceiverMobile(e.target.value.replace(/[^0-9]/g, ''))}
-                  maxLength={10}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <select
-                  className={styles.formSelect}
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                >
-                  <option value="" disabled>Select Delivery City</option>
-                  {availableCities.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
+            <div className={styles.formLayout}>
+              <div className={styles.formFieldsCol}>
+                {/* Type Pills */}
+                <div className={styles.typePillRow}>
+                  {ADDRESS_TYPES.map((type) => (
+                    <button
+                      key={type}
+                      className={`${styles.typePill} ${addressType === type ? styles.typePillActive : ''}`}
+                      onClick={() => setAddressType(type)}
+                    >
+                      {type}
+                    </button>
                   ))}
-                </select>
+                </div>
+
+                {/* Form Fields */}
+                <div className={styles.formGrid}>
+                  <div className={styles.formGroup}>
+                    <input
+                      type="text"
+                      className={styles.formInput}
+                      placeholder="Receiver's Full Name"
+                      value={receiverName}
+                      onChange={(e) => setReceiverName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <input
+                      type="tel"
+                      className={styles.formInput}
+                      placeholder="Receiver's Mobile Number"
+                      value={receiverMobile}
+                      onChange={(e) => setReceiverMobile(e.target.value.replace(/[^0-9]/g, ''))}
+                      maxLength={10}
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <select
+                      className={styles.formSelect}
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                    >
+                      <option value="" disabled>Select Delivery City</option>
+                      {(() => {
+                        const displayCities = [...availableCities];
+                        if (city && !displayCities.includes(city)) {
+                          displayCities.push(city);
+                        }
+                        return displayCities.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ));
+                      })()}
+                    </select>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <input
+                      type="text"
+                      className={styles.formInput}
+                      placeholder="Area / Sector / Street / Locality"
+                      value={addressLine}
+                      onChange={(e) => { isTypingRef.current = true; setAddressLine(e.target.value); }}
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <input
+                      type="text"
+                      className={styles.formInput}
+                      placeholder="Flat / House No. / Floor / Building"
+                      value={flatNo}
+                      onChange={(e) => setFlatNo(e.target.value)}
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <input
+                      type="text"
+                      className={styles.formInput}
+                      placeholder="Nearby Landmark (e.g. Near Mall)"
+                      value={landmark}
+                      onChange={(e) => { isTypingRef.current = true; setLandmark(e.target.value); }}
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className={styles.formGroup}>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  placeholder="Area / Sector / Street / Locality"
-                  value={addressLine}
-                  onChange={(e) => { isTypingRef.current = true; setAddressLine(e.target.value); }}
-                />
+              <div className={styles.mapCol}>
+                {/* Map */}
+                <div className={styles.mapContainer}>
+                  <div ref={mapRef} className={styles.mapView} />
+                  <button className={styles.currentLocationBtn} onClick={handleCurrentLocation}>
+                    <Navigation size={14} />
+                    <span>Current Location</span>
+                  </button>
+                </div>
               </div>
-
-              <div className={styles.formGroup}>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  placeholder="Flat / House No. / Floor / Building"
-                  value={flatNo}
-                  onChange={(e) => setFlatNo(e.target.value)}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  placeholder="Nearby Landmark (e.g. Near Mall)"
-                  value={landmark}
-                  onChange={(e) => { isTypingRef.current = true; setLandmark(e.target.value); }}
-                />
-              </div>
-            </div>
-
-            {/* Map */}
-            <div className={styles.mapContainer}>
-              <div ref={mapRef} className={styles.mapView} />
-              <button className={styles.currentLocationBtn} onClick={handleCurrentLocation}>
-                <Navigation size={14} />
-                <span>Current Location</span>
-              </button>
             </div>
 
             {/* Save Button */}

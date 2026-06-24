@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "next build && node postbuild.js && echo '[POSTBUILD] Copying static assets...' && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static && echo '[POSTBUILD] Creating restart trigger...' && mkdir -p .next/standalone/tmp && touch .next/standalone/tmp/restart.txt && echo '[POSTBUILD] Done!'",
+    "build": "next build && node postbuild.js",
     "start": "node server.js",
     "lint": "eslint"
   },
