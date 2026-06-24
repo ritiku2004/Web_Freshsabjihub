@@ -93,9 +93,9 @@ function CheckoutContent() {
           description: `Order #${rzpData.orderNumber}`,
           order_id: rzpData.razorpayOrderId,
           prefill: {
-            name: user?.name || user?.first_name || '',
+            name: user?.name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'Customer',
             email: user?.email || '',
-            contact: user?.mobile || '',
+            contact: user?.phone_number || activeAddress?.receiverMobile || '',
           },
           theme: {
             color: '#0f7643',
