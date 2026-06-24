@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useRef, useCallback } from 'react';
+import React, { useContext, useRef, useCallback, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, ArrowRight, MapPin, AlertTriangle, Truck, Sparkles } from 'lucide-react';
@@ -62,9 +62,37 @@ function ProductRow({ cat, router, index }) {
   );
 }
 
+function OrderAgainRow({ products, router }) {
+  const scrollRef = useRef(null);
+
+  return (
+    <section className={styles.productSection} style={{ marginBottom: '32px' }}>
+      <div className={styles.sectionHeader}>
+        <div className={styles.sectionTitleGroup}>
+          <h2 className={styles.sectionTitle}>Buy It Again</h2>
+          <span className={styles.productCount} style={{ color: '#16a34a', backgroundColor: '#dcfce7', fontSize: '11px', fontWeight: '800' }}>
+            Recently Ordered
+          </span>
+        </div>
+        <div className={styles.sectionActions}>
+          <CategoryScrollArrows scrollRef={scrollRef} />
+        </div>
+      </div>
+
+      <div className={styles.productsTrack} ref={scrollRef}>
+        {products.map((prod) => (
+          <div key={prod.id} className={styles.productSlide}>
+            <ProductCard product={prod} />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   const router = useRouter();
-  const { activeAddress, activeShop, serviceAvailable } = useContext(AuthContext);
+  const { activeAddress, activeShop, serviceAvailable, loading } = useContext(AuthContext);
 
   const { data: banners = [], isLoading: isLoadingBanners } = useQuery({
     queryKey: ['banners'],
@@ -92,6 +120,33 @@ export default function Home() {
 
   const allProducts = productsData?.products || [];
 
+  const [reorderProducts, setReorderProducts] = useState([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('pastOrders');
+      if (saved && allProducts.length > 0) {
+        try {
+          const orders = JSON.parse(saved);
+          const productIds = [];
+          orders.forEach(order => {
+            order.items?.forEach(item => {
+              if (item.productId && !productIds.includes(item.productId)) {
+                productIds.push(item.productId);
+              }
+            });
+          });
+          const matched = productIds
+            .map(id => allProducts.find(p => String(p.id) === String(id)))
+            .filter(Boolean);
+          setReorderProducts(matched);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  }, [allProducts]);
+
   // Group products by category for horizontal listing
   const categoriesWithProducts = categories.map((cat) => {
     const products = allProducts.filter((p) => String(p.categoryId) === String(cat.id));
@@ -99,6 +154,10 @@ export default function Home() {
   }).filter((cat) => cat.products.length > 0).slice(0, 5);
 
   // --- Empty States -----------------------------------------
+  if (loading) {
+    return <Loader />;
+  }
+
   if (!activeAddress) {
     return (
       <div className={styles.emptyStateContainer}>
@@ -107,7 +166,7 @@ export default function Home() {
         </div>
         <h2 className={styles.emptyStateTitle}>Choose Delivery Location</h2>
         <p className={styles.emptyStateText}>
-          Please select a saved address or enter a valid zipcode to check serviceability and browse products.
+          Please select or add a saved address to check serviceability and browse products.
         </p>
       </div>
     );
@@ -121,7 +180,7 @@ export default function Home() {
         </div>
         <h2 className={styles.emptyStateTitle}>No Service Available</h2>
         <p className={styles.emptyStateText}>
-          We do not deliver to zipcode <strong>{activeAddress.zipcode}</strong>. We currently support select zipcodes of Noida and New Delhi (e.g. 10001 or 110070).
+          We currently do not support delivery to your selected location. Please select or add a different address.
         </p>
       </div>
     );
@@ -130,7 +189,7 @@ export default function Home() {
   const isScreenLoading = isLoadingBanners || isLoadingCategories || isLoadingProducts;
 
   if (isScreenLoading) {
-    return <Loader text="Freshness on the way" />;
+    return <Loader />;
   }
 
   return (
@@ -179,6 +238,11 @@ export default function Home() {
             ))}
           </div>
         </section>
+      )}
+
+      {/* --- Order Again Row ----------------------------------- */}
+      {reorderProducts.length > 0 && (
+        <OrderAgainRow products={reorderProducts} router={router} />
       )}
 
       {/* --- Category Product Rows ----------------------------- */}

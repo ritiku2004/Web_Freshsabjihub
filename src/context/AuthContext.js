@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
   });
   const [serviceAvailable, setServiceAvailable] = useState(true);
   const [deliveryETA, setDeliveryETA] = useState(14);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const updateLocationAndShop = async (address) => {
     if (!address || !address.latitude || !address.longitude) {
@@ -95,6 +95,8 @@ export const AuthProvider = ({ children }) => {
       landmark: addr.address_line2 || '',
       receiverName: addr.receiver_name || '',
       receiverMobile: addr.receiver_mobile || '',
+      zipcode: addr.zipcode || '',
+      city: addr.city || '',
       latitude: Number(addr.latitude) || 28.6139,
       longitude: Number(addr.longitude) || 77.2090,
     };
@@ -106,6 +108,9 @@ export const AuthProvider = ({ children }) => {
       title: addr.type || 'Home',
       address_line1: `${addr.flatNo || ''}||${addr.addressLine || ''}`,
       address_line2: addr.landmark || '',
+      city: addr.city || 'City',
+      state: 'State',
+      zipcode: addr.zipcode,
       latitude: addr.latitude || 28.6139,
       longitude: addr.longitude || 77.2090,
       is_default: false,
@@ -174,8 +179,13 @@ export const AuthProvider = ({ children }) => {
                 updateLocationAndShop(null);
               }
             }
+            setLoading(false);
+          }).catch(() => {
+            setLoading(false);
           });
-        } catch (e) {}
+        } catch (e) {
+          setLoading(false);
+        }
       } else {
         if (storedAddress) {
           try {
@@ -187,7 +197,10 @@ export const AuthProvider = ({ children }) => {
         } else {
           updateLocationAndShop(null);
         }
+        setLoading(false);
       }
+    } else {
+      setLoading(false);
     }
   }, []);
 
@@ -229,6 +242,9 @@ export const AuthProvider = ({ children }) => {
               title: guestAddr.type || 'Other',
               address_line1: `${guestAddr.flatNo || ''}||${guestAddr.addressLine || ''}`,
               address_line2: guestAddr.landmark || '',
+              city: guestAddr.city || 'City',
+              state: 'State',
+              zipcode: guestAddr.zipcode,
               latitude: guestAddr.latitude,
               longitude: guestAddr.longitude,
               is_default: false,
@@ -257,6 +273,8 @@ export const AuthProvider = ({ children }) => {
               landmark: b.address_line2 || '',
               receiverName: b.receiver_name || userData.first_name || 'User',
               receiverMobile: b.receiver_mobile || userData.phone_number || '',
+              zipcode: b.zipcode,
+              city: b.city || '',
               latitude: b.latitude,
               longitude: b.longitude,
             };
@@ -314,7 +332,8 @@ export const AuthProvider = ({ children }) => {
             address_line1: `${newAddress.flatNo || ''}||${newAddress.addressLine || ''}`,
             address_line2: newAddress.landmark || '',
             city: newAddress.city || 'City',
-            state: newAddress.state || 'State',
+            state: 'State',
+            zipcode: newAddress.zipcode,
             latitude: newAddress.latitude,
             longitude: newAddress.longitude,
             is_default: false,
@@ -425,6 +444,8 @@ export const AuthProvider = ({ children }) => {
             landmark: b.address_line2 || '',
             receiverName: b.receiver_name || user.first_name || 'User',
             receiverMobile: b.receiver_mobile || user.phone_number || '',
+            zipcode: b.zipcode,
+            city: b.city || '',
             latitude: b.latitude,
             longitude: b.longitude,
           };

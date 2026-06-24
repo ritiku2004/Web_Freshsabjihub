@@ -57,51 +57,61 @@ export default function NotificationsPage() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className={styles.notificationsPage}>
-      {notifications.length > 0 && (
-        <div className={styles.headerActions}>
-          <button className={styles.actionBtn} onClick={markAllAsRead}>
-            <CheckSquare size={16} /> Mark All Read
-          </button>
-          <button className={`${styles.actionBtn} ${styles.clearBtn}`} onClick={clearAll}>
-            <Trash2 size={16} /> Clear All
-          </button>
-        </div>
-      )}
+    <div className={styles.container}>
+      {/* Header */}
+      <div className={styles.pageHeader}>
+        <button onClick={() => router.back()} className={styles.backBtn} aria-label="Go back">
+          <ArrowLeft size={20} />
+        </button>
+        <h1 className={styles.pageTitle}>Notifications</h1>
+      </div>
 
-      <div className={styles.content}>
-        {notifications.length > 0 ? (
-          <div className={styles.notificationsList}>
-            {notifications.map((item) => (
-              <div
-                key={item.id}
-                className={`${styles.notificationCard} ${!item.isRead ? styles.unreadCard : ''} ${item.clickable ? styles.clickableCard : ''}`}
-                onClick={() => handleNotificationClick(item)}
-              >
-                <div className={styles.iconWrapper}>
-                  {getIcon(item.type)}
-                </div>
-                <div className={styles.textContainer}>
-                  <div className={styles.cardHeader}>
-                    <h3 className={`${styles.title} ${!item.isRead ? styles.unreadTitle : ''}`}>
-                      {item.title}
-                    </h3>
-                    <span className={styles.timeText}>{item.time}</span>
-                  </div>
-                  <p className={styles.messageText}>{item.message}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className={styles.emptyContainer}>
-            <div className={styles.emptyIconCircle}>
-              <Bell size={40} className={styles.emptyBell} />
-            </div>
-            <h2 className={styles.emptyTitle}>No Notifications Yet</h2>
-            <p className={styles.emptySubtitle}>When you get notifications, they'll show up here</p>
+      <div className={styles.notificationsPage}>
+        {notifications.length > 0 && (
+          <div className={styles.headerActions}>
+            <button className={styles.actionBtn} onClick={markAllAsRead}>
+              <CheckSquare size={16} /> Mark All Read
+            </button>
+            <button className={`${styles.actionBtn} ${styles.clearBtn}`} onClick={clearAll}>
+              <Trash2 size={16} /> Clear All
+            </button>
           </div>
         )}
+
+        <div className={styles.content}>
+          {notifications.length > 0 ? (
+            <div className={styles.notificationsList}>
+              {notifications.map((item) => (
+                <div
+                  key={item.id}
+                  className={`${styles.notificationCard} ${!item.isRead ? styles.unreadCard : ''} ${item.clickable ? styles.clickableCard : ''}`}
+                  onClick={() => handleNotificationClick(item)}
+                >
+                  <div className={styles.iconWrapper}>
+                    {getIcon(item.type)}
+                  </div>
+                  <div className={styles.textContainer}>
+                    <div className={styles.cardHeader}>
+                      <h3 className={`${styles.title} ${!item.isRead ? styles.unreadTitle : ''}`}>
+                        {item.title}
+                      </h3>
+                      <span className={styles.timeText}>{item.time}</span>
+                    </div>
+                    <p className={styles.messageText}>{item.message}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className={styles.emptyContainer}>
+              <div className={styles.emptyIconCircle}>
+                <Bell size={40} className={styles.emptyBell} />
+              </div>
+              <h2 className={styles.emptyTitle}>No Notifications Yet</h2>
+              <p className={styles.emptySubtitle}>When you get notifications, they'll show up here</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

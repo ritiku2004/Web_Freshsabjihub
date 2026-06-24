@@ -13,7 +13,7 @@ import { api } from '../../services/api';
 import styles from '../page.module.css';
 
 function CategoriesContent() {
-  const { activeAddress, activeShop, serviceAvailable } = useContext(AuthContext);
+  const { activeAddress, activeShop, serviceAvailable, loading } = useContext(AuthContext);
   const searchParams = useSearchParams();
   const router = useRouter();
   const catParam = searchParams.get('cat');
@@ -55,6 +55,10 @@ function CategoriesContent() {
 
   const categoryProducts = productsData?.products || [];
 
+  if (loading) {
+    return <Loader />;
+  }
+
   if (!activeAddress) {
     return (
       <div className={styles.emptyStateContainer}>
@@ -82,7 +86,7 @@ function CategoriesContent() {
   const isScreenLoading = isLoadingCategories || (selectedCategoryId && isLoadingProducts);
 
   if (isScreenLoading) {
-    return <Loader text="Fetching fresh products..." />;
+    return <Loader />;
   }
 
   return (
@@ -154,7 +158,8 @@ function CategoriesContent() {
             className={styles.backToCategoriesBtn} 
             onClick={() => handleCategorySelect(null)}
           >
-            ← Back to All Categories
+            <ArrowLeft size={16} style={{ marginRight: '8px' }} />
+            Back to All Categories
           </button>
 
           <div className={styles.categoryProductsLayout}>

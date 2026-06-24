@@ -215,7 +215,7 @@ export default function ProfilePage() {
   };
 
   if (loadingAuth) {
-    return <Loader text="Loading Profile..." />;
+    return <Loader />;
   }
 
   const displayName = user?.name || (user?.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : '') || 'Guest User';

@@ -7,14 +7,18 @@ export default function AppDownloadModal() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Check if user has already dismissed the modal in this session
-    const isDismissed = sessionStorage.getItem('hideAppDownloadModal');
+    // Check if user has already dismissed the modal
+    const isDismissed = localStorage.getItem('hideAppDownloadModal');
     if (isDismissed === 'true') {
       return;
     }
 
     // Helper to check mobile user agents or small screens
     const checkDevice = () => {
+      if (localStorage.getItem('hideAppDownloadModal') === 'true') {
+        setIsOpen(false);
+        return;
+      }
       const isSmallScreen = window.innerWidth <= 768;
       const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
         navigator.userAgent
@@ -35,7 +39,7 @@ export default function AppDownloadModal() {
 
   const handleDismiss = () => {
     setIsOpen(false);
-    sessionStorage.setItem('hideAppDownloadModal', 'true');
+    localStorage.setItem('hideAppDownloadModal', 'true');
   };
 
   const handleDownload = () => {

@@ -11,7 +11,7 @@ import styles from '../app/page.module.css';
 
 export default function ConditionalLayout({ children }) {
   const pathname = usePathname();
-  const hideLayout = pathname === '/login' || pathname === '/otp' || pathname === '/addresses' || pathname === '/about' || pathname === '/terms' || pathname === '/privacy' || pathname === '/contact' || pathname === '/profile' || pathname.startsWith('/product/') || (pathname.startsWith('/orders/') && pathname !== '/orders');
+  const hideLayout = pathname === '/login' || pathname === '/otp' || pathname === '/addresses' || pathname === '/about' || pathname === '/terms' || pathname === '/privacy' || pathname === '/contact' || pathname === '/profile' || pathname === '/notifications' || pathname.startsWith('/product/') || (pathname.startsWith('/orders/') && pathname !== '/orders');
   const isStaticAppPage = pathname === '/about';
   const isProductPage = pathname.startsWith('/product/');
 

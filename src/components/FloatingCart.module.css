@@ -88,3 +88,9 @@
     transform: translateY(0) scale(0.97);
   }
 }
+
+@media (max-width: 767px) {
+  .floatingCart.onProductPage {
+    bottom: 88px;
+  }
+}

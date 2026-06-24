@@ -12,7 +12,7 @@ import styles from '../page.module.css';
 
 export default function OrdersPage() {
   const router = useRouter();
-  const { activeAddress, serviceAvailable, isAuthenticated, user } = useContext(AuthContext);
+  const { activeAddress, serviceAvailable, isAuthenticated, user, loading } = useContext(AuthContext);
   const { addToCart } = useContext(CartContext);
 
   const [pastOrders, setPastOrders] = useState([]);
@@ -79,8 +79,8 @@ export default function OrdersPage() {
     return match ? match.image : 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=150';
   };
 
-  if (loadingAuth) {
-    return <Loader text="Loading Orders..." />;
+  if (loadingAuth || loading) {
+    return <Loader />;
   }
 
   if (!activeAddress) {
@@ -100,9 +100,6 @@ export default function OrdersPage() {
       <div className={styles.emptyStateContainer}>
         <AlertTriangle size={48} color="#ef4444" />
         <h2 className={styles.emptyStateTitle}>No Service Available</h2>
-        <p className={styles.emptyStateText}>
-          We do not deliver to zipcode <strong>{activeAddress.zipcode}</strong>. We currently support select zipcodes of Noida and New Delhi (e.g. 10001 or 110070).
-        </p>
       </div>
     );
   }

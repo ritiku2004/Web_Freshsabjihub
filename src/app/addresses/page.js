@@ -13,6 +13,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
+import { api } from '../../services/api';
 import styles from './addresses.module.css';
 
 const ADDRESS_TYPES = ['Home', 'Office', 'Other'];
@@ -34,7 +35,8 @@ export default function AddressesPage() {
   const [flatNo, setFlatNo] = useState('');
   const [addressLine, setAddressLine] = useState('');
   const [landmark, setLandmark] = useState('');
-  const [zipcode, setZipcode] = useState('');
+  const [city, setCity] = useState('');
+  const [availableCities, setAvailableCities] = useState([]);
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [editingAddressId, setEditingAddressId] = useState(null);
@@ -46,6 +48,20 @@ export default function AddressesPage() {
   const markerRef = useRef(null);
   const isTypingRef = useRef(false);
 
+  // Fetch available cities on mount
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        const shops = await api.getShops();
+        const cities = [...new Set(shops.filter(s => s.is_active).map(s => s.city))];
+        setAvailableCities(cities);
+      } catch (err) {
+        console.error('Error fetching shops/cities:', err);
+      }
+    };
+    loadCities();
+  }, []);
+
   // Populate form when addressType changes
   useEffect(() => {
     const existing = addresses.find(addr => addr.type === addressType);
@@ -55,14 +71,23 @@ export default function AddressesPage() {
       setFlatNo(existing.flatNo || '');
       setAddressLine(existing.addressLine || '');
       setLandmark(existing.landmark || '');
-      setZipcode(existing.zipcode || '');
+      setCity(existing.city || '');
       setLatitude(existing.latitude || null);
       setLongitude(existing.longitude || null);
       setEditingAddressId(existing.id);
     } else {
       clearForm();
     }
-  }, [addressType, addresses]);
+  }, [addressType, addresses, availableCities]);
+
+  // Sync addressType with activeAddress selection
+  useEffect(() => {
+    if (activeAddress && activeAddress.type) {
+      setAddressType(activeAddress.type);
+    } else {
+      setAddressType('Home');
+    }
+  }, [activeAddress]);
 
   // Initialize Leaflet map
   useEffect(() => {
@@ -143,38 +168,66 @@ export default function AddressesPage() {
   }, [latitude, longitude, mapReady]);
 
   // Search location on typing, matching the mobile app behavior
+  // Automatically point map to the city when user changes city
   useEffect(() => {
-    if (!isTypingRef.current) return;
+    if (!city) return;
     
     const timeoutId = setTimeout(async () => {
-      const fullAddress = `${addressLine} ${landmark} ${zipcode}`.trim();
-      if (fullAddress.length > 8) {
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.length > 0) {
-              const best = data[0];
-              const lat = Number(best.lat);
-              const lng = Number(best.lon);
-              setLatitude(lat);
-              setLongitude(lng);
-              
-              if (leafletMapRef.current && markerRef.current) {
-                leafletMapRef.current.setView([lat, lng], 16);
-                markerRef.current.setLatLng([lat, lng]);
-              }
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city.trim())}&limit=1`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.length > 0) {
+            const best = data[0];
+            const lat = Number(best.lat);
+            const lng = Number(best.lon);
+            setLatitude(lat);
+            setLongitude(lng);
+            
+            if (leafletMapRef.current && markerRef.current) {
+              leafletMapRef.current.setView([lat, lng], 12);
+              markerRef.current.setLatLng([lat, lng]);
             }
           }
-        } catch (e) {
-          console.error('Geocoding search failed:', e);
         }
+      } catch (e) {
+        console.error('City geocoding failed:', e);
       }
-      isTypingRef.current = false;
-    }, 1500);
+    }, 1200);
 
     return () => clearTimeout(timeoutId);
-  }, [addressLine, landmark, zipcode]);
+  }, [city]);
+
+  // Refined search when user enters area/colony/sector
+  useEffect(() => {
+    if (!addressLine.trim() || !city.trim()) return;
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        const query = `${addressLine.trim()}, ${city.trim()}`;
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.length > 0) {
+            const best = data[0];
+            const lat = Number(best.lat);
+            const lng = Number(best.lon);
+            setLatitude(lat);
+            setLongitude(lng);
+            
+            if (leafletMapRef.current && markerRef.current) {
+              leafletMapRef.current.setView([lat, lng], 15);
+              markerRef.current.setLatLng([lat, lng]);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Area geocoding failed, staying on city:', e);
+      }
+    }, 1200);
+
+    return () => clearTimeout(timeoutId);
+  }, [addressLine]);
 
   const reverseGeocode = async (lat, lng) => {
     try {
@@ -183,12 +236,10 @@ export default function AddressesPage() {
         const data = await res.json();
         if (data && data.address) {
           const addr = data.address;
-          const postalCode = addr.postcode || '';
           const road = addr.road || addr.suburb || addr.neighbourhood || addr.amenity || '';
           const landmarkVal = addr.suburb || addr.city_district || addr.city || '';
           
           setAddressLine(prev => prev || road);
-          setZipcode(prev => prev || postalCode);
           setLandmark(prev => prev || landmarkVal);
         }
       }
@@ -203,7 +254,7 @@ export default function AddressesPage() {
     setFlatNo('');
     setAddressLine('');
     setLandmark('');
-    setZipcode('');
+    setCity('');
     setLatitude(null);
     setLongitude(null);
     setEditingAddressId(null);
@@ -229,16 +280,12 @@ export default function AddressesPage() {
   };
 
   const handleSave = () => {
-    if (!receiverName.trim() || !receiverMobile.trim() || !flatNo.trim() || !addressLine.trim() || !landmark.trim() || !zipcode.trim()) {
+    if (!receiverName.trim() || !receiverMobile.trim() || !flatNo.trim() || !addressLine.trim() || !landmark.trim() || !city.trim()) {
       alert('Please fill in all fields.');
       return;
     }
     if (receiverMobile.trim().length < 10) {
       alert('Please enter a valid 10-digit mobile number.');
-      return;
-    }
-    if (zipcode.trim().length < 5) {
-      alert('Please enter a valid zip code.');
       return;
     }
 
@@ -252,7 +299,7 @@ export default function AddressesPage() {
       flatNo: flatNo.trim(),
       addressLine: addressLine.trim(),
       landmark: landmark.trim(),
-      zipcode: zipcode.trim(),
+      city: city.trim(),
       latitude: latitude || 28.6139,
       longitude: longitude || 77.2090,
     };
@@ -285,7 +332,7 @@ export default function AddressesPage() {
     }
   };
 
-  const isFormValid = receiverName.trim() && receiverMobile.trim().length >= 10 && flatNo.trim() && addressLine.trim() && landmark.trim() && zipcode.trim().length >= 5;
+  const isFormValid = receiverName.trim() && receiverMobile.trim().length >= 10 && flatNo.trim() && addressLine.trim() && landmark.trim() && city.trim();
 
   return (
     <div className={styles.addressPage}>
@@ -325,7 +372,7 @@ export default function AddressesPage() {
                           </span>
                         )}
                         <span className={styles.addressDetail}>
-                          {item.flatNo}, {item.addressLine}. Landmark: {item.landmark}. Zip: {item.zipcode || 'N/A'}
+                          {item.flatNo}, {item.addressLine}. Landmark: {item.landmark}. City: {item.city || 'N/A'}
                         </span>
                       </div>
                     </div>
@@ -366,66 +413,72 @@ export default function AddressesPage() {
             </div>
 
             {/* Form Fields */}
-            <div className={styles.formGroup}>
-              <input
-                type="text"
-                className={styles.formInput}
-                placeholder="Receiver's Full Name"
-                value={receiverName}
-                onChange={(e) => setReceiverName(e.target.value)}
-              />
-            </div>
+            <div className={styles.formGrid}>
+              <div className={styles.formGroup}>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  placeholder="Receiver's Full Name"
+                  value={receiverName}
+                  onChange={(e) => setReceiverName(e.target.value)}
+                />
+              </div>
 
-            <div className={styles.formGroup}>
-              <input
-                type="tel"
-                className={styles.formInput}
-                placeholder="Receiver's Mobile Number"
-                value={receiverMobile}
-                onChange={(e) => setReceiverMobile(e.target.value.replace(/[^0-9]/g, ''))}
-                maxLength={10}
-              />
-            </div>
+              <div className={styles.formGroup}>
+                <input
+                  type="tel"
+                  className={styles.formInput}
+                  placeholder="Receiver's Mobile Number"
+                  value={receiverMobile}
+                  onChange={(e) => setReceiverMobile(e.target.value.replace(/[^0-9]/g, ''))}
+                  maxLength={10}
+                />
+              </div>
 
-            <div className={styles.formGroup}>
-              <input
-                type="text"
-                className={styles.formInput}
-                placeholder="Flat / House No. / Floor / Building"
-                value={flatNo}
-                onChange={(e) => setFlatNo(e.target.value)}
-              />
-            </div>
+              <div className={styles.formGroup}>
+                <select
+                  className={styles.formSelect}
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                >
+                  <option value="" disabled>Select Delivery City</option>
+                  {availableCities.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className={styles.formGroup}>
-              <input
-                type="text"
-                className={styles.formInput}
-                placeholder="Area / Sector / Street / Locality"
-                value={addressLine}
-                onChange={(e) => { isTypingRef.current = true; setAddressLine(e.target.value); }}
-              />
-            </div>
+              <div className={styles.formGroup}>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  placeholder="Area / Sector / Street / Locality"
+                  value={addressLine}
+                  onChange={(e) => { isTypingRef.current = true; setAddressLine(e.target.value); }}
+                />
+              </div>
 
-            <div className={styles.formGroup}>
-              <input
-                type="text"
-                className={styles.formInput}
-                placeholder="Nearby Landmark (e.g. Near Mall)"
-                value={landmark}
-                onChange={(e) => { isTypingRef.current = true; setLandmark(e.target.value); }}
-              />
-            </div>
+              <div className={styles.formGroup}>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  placeholder="Flat / House No. / Floor / Building"
+                  value={flatNo}
+                  onChange={(e) => setFlatNo(e.target.value)}
+                />
+              </div>
 
-            <div className={styles.formGroup}>
-              <input
-                type="text"
-                className={styles.formInput}
-                placeholder="Zip Code / Pincode"
-                value={zipcode}
-                onChange={(e) => { isTypingRef.current = true; setZipcode(e.target.value.replace(/[^0-9]/g, '')); }}
-                maxLength={6}
-              />
+              <div className={styles.formGroup}>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  placeholder="Nearby Landmark (e.g. Near Mall)"
+                  value={landmark}
+                  onChange={(e) => { isTypingRef.current = true; setLandmark(e.target.value); }}
+                />
+              </div>
             </div>
 
             {/* Map */}

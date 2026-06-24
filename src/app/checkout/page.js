@@ -352,6 +352,8 @@ function CheckoutContent() {
               <span>₹{handlingFee}</span>
             </div>
 
+
+
             {driverTip > 0 && (
               <div className={styles.billingRow}>
                 <span>Driver Tip</span>

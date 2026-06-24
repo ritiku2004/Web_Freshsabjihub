@@ -61,6 +61,15 @@ export default function Navbar({
     
     // Slight delay to allow click events on suggestions/pills/product cards to register first
     setTimeout(() => {
+      // Prevent redirect if user is hovering/interacting with the search page content (pills, cards, etc.)
+      if (
+        document.querySelector('[class*="searchContainer"]:hover') ||
+        document.querySelector('[class*="resultsGrid"]:hover') ||
+        document.querySelector('[class*="emptyResults"]:hover')
+      ) {
+        return;
+      }
+
       const activeEl = document.activeElement;
       if (activeEl && (
         activeEl.closest('[class*="searchContainer"]') || 

@@ -1,84 +1,173 @@
 .footer {
-  background: #ffffff;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
   color: #475569;
-  padding: 36px 24px 24px;
-  border-top: 1px solid #f1f5f9;
+  padding: 0 0 40px;
+  border-top: 1px solid #e2e8f0;
   margin-top: auto;
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .container {
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+  padding: 0 24px;
+  box-sizing: border-box;
 }
 
-.appBrandedHeader {
+/* 1. Value Highlights Strip */
+.highlightsStrip {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #e2e8f0;
+  padding: 32px 0;
+  margin-bottom: 48px;
+}
+
+.highlightsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.highlightCard {
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.highlightIconWrapper {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  padding-bottom: 28px;
+  flex-shrink: 0;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.05);
 }
 
-.appBrandedTitle {
-  font-size: 26px;
-  font-weight: 900;
-  color: #94a3b8; /* Darker slate gray for better contrast */
-  letter-spacing: 0.5px;
-  margin: 0;
-}
-
-.appBrandedSub {
-  font-size: 16px;
-  font-weight: 800;
-  color: #cbd5e1; /* Darker slate gray for better contrast */
-  margin-top: 8px;
-  letter-spacing: 2px;
-  text-transform: lowercase;
-}
-
-.brandDivider {
-  width: 85%;
-  height: 1px;
-  background-color: #f1f5f9;
-  margin-top: 24px;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: 4.5fr 7.5fr; /* Exact layout split from reference screenshot */
-  gap: 48px;
-  margin-bottom: 28px;
-}
-
-.usefulLinksSection, .categoriesSection {
+.highlightContent {
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
 
-.sectionHeading {
+.highlightTitle {
   font-size: 15px;
   font-weight: 700;
   color: #0f172a;
-  margin-bottom: 24px;
+  margin: 0;
+}
+
+.highlightDesc {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* 2. Main Content Grid */
+.grid {
+  display: grid;
+  grid-template-columns: 4fr 2.5fr 5.5fr;
+  gap: 64px;
+  margin-bottom: 48px;
+}
+
+.brandSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.logoRow {
   display: flex;
   align-items: center;
-  letter-spacing: -0.2px;
+  gap: 10px;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.logoIconBg {
+  background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+}
+
+.logoLeaf {
+  color: white;
+}
+
+.logoText {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+}
+
+.brandTagline {
+  font-size: 13.5px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.securityWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #16a34a;
+  background: rgba(34, 197, 94, 0.08);
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(34, 197, 94, 0.15);
+}
+
+.categoriesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.categoriesHeader .sectionHeading {
+  margin-bottom: 0;
+}
+
+.sectionHeading {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
 }
 
 .seeAllGreen {
-  font-size: 13px;
-  font-weight: 600;
-  color: #0c831f; /* Blinkit Green brand color */
+  font-size: 12px;
+  font-weight: 700;
+  color: #16a34a;
   background: transparent;
   border: none;
   cursor: pointer;
   padding: 0;
-  margin-left: 8px;
   text-transform: lowercase;
-  transition: opacity 0.15s;
+  transition: all 0.2s ease;
 }
 
 .seeAllGreen:hover {
@@ -86,10 +175,10 @@
   opacity: 0.85;
 }
 
-.linksSubGrid {
+.categoriesGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 20px;
 }
 
 .linkColumn {
@@ -106,144 +195,99 @@
   text-align: left;
   cursor: pointer;
   padding: 0;
-  transition: all 0.15s ease-in-out;
+  transition: all 0.2s ease;
   text-decoration: none;
   width: fit-content;
   line-height: 1.4;
+  font-weight: 500;
 }
 
 .linkColumn a:hover, .linkColumn button:hover {
-  color: #0f172a;
-  transform: translateY(-1px);
+  color: #16a34a;
+  transform: translateX(4px);
 }
 
+/* 3. Bottom Bar */
 .bottomBar {
-  padding: 16px 0;
-  border-top: 1px solid #f1f5f9;
+  padding-top: 32px;
+  border-top: 1px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 24px;
 }
 
 .copyright {
   font-size: 13px;
-  color: #8c96a3;
-  font-weight: 500;
-}
-
-.downloadAppsSection {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.downloadLabel {
-  font-size: 13.5px;
-  font-weight: 700;
-  color: #475569;
-}
-
-.appBadgeRow {
-  display: flex;
-  gap: 12px;
-}
-
-.appBadge {
-  background: #0f172a; /* Slate 900 */
-  color: white !important;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: 1px solid #1e293b;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  text-decoration: none;
-}
-
-.appBadge:hover {
-  background: #1e293b;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
-}
-
-.appBadge svg {
-  flex-shrink: 0;
-  color: white;
-}
-
-.appBadgeText {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
-
-.appBadgeSub {
-  font-size: 7px;
-  font-weight: 600;
-  text-transform: uppercase;
   color: #94a3b8;
-  letter-spacing: 0.2px;
 }
 
-.appBadgeTitle {
-  font-size: 12px;
-  font-weight: 700;
-  color: white;
+.bottomRight {
+  display: flex;
+  align-items: center;
+  gap: 24px;
 }
 
 .socialBadgesRow {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .blackSocialBtn {
-  width: 36px;
-  height: 36px;
-  background: #000000; /* Solid Black circle matching screenshot */
-  color: white !important;
+  width: 34px;
+  height: 34px;
+  background: #ffffff;
+  color: #64748b !important;
+  border: 1px solid #e2e8f0;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease;
 }
 
 .blackSocialBtn:hover {
-  background: #334155;
+  background: #16a34a;
+  color: white !important;
+  border-color: #16a34a;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
 }
 
-.blackSocialBtn svg {
-  color: white;
+.scrollTopBtn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 }
 
-.disclaimerText {
-  font-size: 12px;
-  color: #94a3b8;
-  line-height: 1.8;
-  border-top: 1px solid #f1f5f9;
-  padding-top: 24px;
-  margin-top: 8px;
-  text-align: justify;
+.scrollTopBtn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
 }
 
-/* Responsiveness overrides */
-@media (max-width: 992px) {
+/* Responsiveness */
+@media (max-width: 1024px) {
+  .highlightsGrid {
+    gap: 20px;
+  }
   .grid {
-    grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 32px;
+    grid-template-columns: 1.2fr 1fr 2fr;
   }
 }
 
-/* On small screens, completely hide the footer as requested */
 @media (max-width: 768px) {
   .footer {
     display: none !important;
   }
 }
-

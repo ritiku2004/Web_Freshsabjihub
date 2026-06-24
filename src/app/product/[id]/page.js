@@ -39,7 +39,7 @@ export default function ProductDetailPage() {
   if (isLoading) {
     return (
       <div className={styles.loadingWrapper}>
-        <Loader text="Loading product details..." />
+        <Loader />
       </div>
     );
   }
