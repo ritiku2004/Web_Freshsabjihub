@@ -8,7 +8,7 @@
  * crash → no restart loops.
  *
  * Startup messages you'll see in Hostinger logs:
- *   "▲ Next.js 16.2.9 / ✓ Ready in 0ms"
+ *   "▲ Next.js 16.2.9 / ✓ Ready in 0ms"    
  * Those come from Next.js itself during app.prepare() — that's normal.
  */
 
