@@ -6,7 +6,7 @@ export const getApiBaseUrl = () => {
   return `http://${hostname}:5000/api/v1`;
 };
 
-export const API_BASE_URL = getApiBaseUrl();
+export const API_BASE_URL = getApiBaseUrl();  
 
 let authToken = null;
 
