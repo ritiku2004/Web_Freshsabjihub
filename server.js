@@ -1,105 +1,87 @@
 /**
- * FreshSabjiHub - Hostinger-Compatible Production Server
+ * FreshSabjiHub – Root server.js (repo root)
  *
- * IMPORTANT: Hostinger's Node.js hosting runs its own process manager that
- * bypasses 'npm start' and executes Next.js startup code directly. Our
- * custom lock-file mechanism never runs. This file now wraps Next.js's own
- * HTTP server with a minimal EADDRINUSE guard so secondary workers never
- * crash → no restart loops.
+ * Hostinger runs this via `npm start` from the repo root.
+ * Instead of using the next() API (which doesn't work with standalone output),
+ * this spawns .next/standalone/server.js as a child process.
  *
- * Startup messages you'll see in Hostinger logs:
- *   "▲ Next.js 16.2.9 / ✓ Ready in 0ms"    
- * Those come from Next.js itself during app.prepare() — that's normal.
+ * Crash-prevention strategy:
+ *  1. Probe the port first — if busy, park as secondary (no exit = no restart loop)
+ *  2. If free, spawn the real standalone server as a child process
+ *  3. If the child crashes (EADDRINUSE, OOM, any reason), park instead of exiting
+ *  4. Periodically poll — if primary dies, spawn again to take over
  */
 
 'use strict';
 
-const http  = require('http');
-const { parse } = require('url');
-const next  = require('next');
-const path  = require('path');
-const net   = require('net');
+const { spawn } = require('child_process');
+const net       = require('net');
+const path      = require('path');
+const fs        = require('fs');
 
-const PORT = parseInt(process.env.PORT, 10) || 3000;
-process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+const PORT            = parseInt(process.env.PORT, 10) || 3000;
+const STANDALONE_SERVER = path.join(__dirname, '.next', 'standalone', 'server.js');
 
-// ── Keep process alive indefinitely (no exit = no Hostinger restart loop) ──
-function parkForever(reason) {
-  console.log(`[FSH] PID=${process.pid} parked (${reason}) – no restart needed`);
-  // Dummy interval keeps the event loop running so Hostinger won't kill us
+console.log(`[FSH] PID=${process.pid} root-server starting on PORT=${PORT}`);
+
+// Verify standalone server exists
+if (!fs.existsSync(STANDALONE_SERVER)) {
+  console.error(`[FSH] ERROR: ${STANDALONE_SERVER} not found!`);
+  console.error('[FSH] Did "next build" run with output: standalone?');
+  // Keep alive to avoid Hostinger restart loop
   setInterval(() => {}, 60_000);
+  return;
 }
 
-// ── Quick port probe: returns true if port is FREE, false if already in use ──
-function isPortFree(port) {
-  return new Promise((resolve) => {
-    const tester = net.createServer();
-    tester.once('error', (err) => {
-      tester.close();
-      resolve(err.code !== 'EADDRINUSE'); // port busy = false
+// ── Port probe ────────────────────────────────────────────────────────────────
+function isPortFree(callback) {
+  const tester = net.createServer();
+  tester.once('error', () => { tester.close(); callback(false); });
+  tester.once('listening', () => { tester.close(() => callback(true)); });
+  tester.listen(PORT, '0.0.0.0');
+}
+
+// ── Park: keep process alive, poll to retry as primary ───────────────────────
+function parkAndPoll(reason) {
+  console.log(`[FSH] PID=${process.pid} parking (${reason}), polling every 8s`);
+  const poll = setInterval(() => {
+    isPortFree((free) => {
+      if (free) {
+        clearInterval(poll);
+        console.log(`[FSH] PID=${process.pid} primary slot free — taking over`);
+        spawnPrimary();
+      }
     });
-    tester.once('listening', () => {
-      tester.close(() => resolve(true)); // port free = true
-    });
-    tester.listen(port, '0.0.0.0');
+  }, 8000);
+}
+
+// ── Spawn the standalone server as child process ──────────────────────────────
+function spawnPrimary() {
+  console.log(`[FSH] PID=${process.pid} spawning ${STANDALONE_SERVER}`);
+
+  const child = spawn(process.execPath, [STANDALONE_SERVER], {
+    stdio: 'inherit',           // child logs appear in Hostinger runtime logs
+    env: { ...process.env },
+    cwd: path.join(__dirname, '.next', 'standalone'),
+  });
+
+  child.on('error', (err) => {
+    console.error(`[FSH] Failed to spawn child: ${err.message}`);
+    parkAndPoll('spawn-error');
+  });
+
+  child.on('exit', (code, signal) => {
+    console.log(`[FSH] Child exited (code=${code} signal=${signal}) — parking instead of crashing`);
+    // Do NOT let the parent exit — that would cause Hostinger to restart us
+    parkAndPoll(`child-exit-${code ?? signal}`);
   });
 }
 
-async function main() {
-  console.log(`[FSH] PID=${process.pid} starting on PORT=${PORT}`);
-
-  // Fast port probe before doing expensive app.prepare()
-  // This avoids two workers both spending ~1s on preparation.
-  const free = await isPortFree(PORT);
-  if (!free) {
-    // Another worker already owns the port → we are a secondary.
-    // Do NOT exit — just park so Hostinger doesn't spawn yet another worker.
-    console.log(`[FSH] PID=${process.pid} port ${PORT} already in use → secondary worker`);
-    parkForever('port-busy');
-    return;
+// ── Bootstrap ─────────────────────────────────────────────────────────────────
+isPortFree((free) => {
+  if (free) {
+    spawnPrimary();
+  } else {
+    parkAndPoll('port-busy-on-start');
   }
-
-  // We won the port probe — prepare and start Next.js.
-  const app = next({ dev: false, dir: path.join(__dirname) });
-  const handle = app.getRequestHandler();
-
-  try {
-    await app.prepare();
-  } catch (err) {
-    console.error('[FSH] app.prepare() failed:', err.message || err);
-    parkForever('prepare-error');
-    return;
-  }
-
-  const server = http.createServer((req, res) => {
-    handle(req, res, parse(req.url, true));
-  });
-
-  server.on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-      // Lost the race between probe and listen (tiny window) → park gracefully
-      console.warn(`[FSH] PID=${process.pid} EADDRINUSE after probe → secondary`);
-      server.close();
-      parkForever('eaddrinuse-after-probe');
-      return;
-    }
-    // Any other server error — log but keep process alive
-    console.error(`[FSH] Server error: ${err.message}`);
-  });
-
-  server.listen(PORT, '0.0.0.0', () => {
-    console.log(`[FSH] PID=${process.pid} ✓ Primary – listening on http://0.0.0.0:${PORT}`);
-  });
-
-  // Graceful shutdown signals
-  const shutdown = () => {
-    server.close(() => process.exit(0));
-  };
-  process.once('SIGTERM', shutdown);
-  process.once('SIGINT',  shutdown);
-}
-
-main().catch((err) => {
-  console.error('[FSH] Unhandled startup error:', err);
-  parkForever('unhandled-error');
 });
