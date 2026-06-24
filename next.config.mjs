@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // REQUIRED: Hostinger output directory is set to .next/standalone
+  // Without this, next build never creates that directory → 503 on every deploy
+  output: 'standalone',
+
   // Limit CPU usage on shared Hostinger hosting
   experimental: {
     cpus: 1,
@@ -9,10 +13,9 @@ const nextConfig = {
   async headers() {
     return [
       {
-        // Prevent browsers from caching HTML pages across deployments.
-        // This stops "Failed to find Server Action" errors caused by a
-        // browser serving stale JS that references old build's action IDs.
-        // Do NOT add custom Cache-Control for /_next/* — Next.js manages those.
+        // Prevent browsers caching HTML across deployments.
+        // Stops "Failed to find Server Action" errors from stale client bundles.
+        // Excludes /_next/ — Next.js manages those with content-hashed filenames.
         source: '/((?!_next).*)',
         headers: [
           {
@@ -24,7 +27,7 @@ const nextConfig = {
     ];
   },
 
-  // Redirect HTTP → HTTPS (Hostinger uses x-forwarded-proto header)
+  // Redirect HTTP → HTTPS (Hostinger sets x-forwarded-proto)
   async redirects() {
     return [
       {
