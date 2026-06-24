@@ -1,118 +1,126 @@
 /**
- * hostinger-server.js
+ * hostinger-server.js → copied to .next/standalone/server.js in postbuild
  *
- * Copied to .next/standalone/server.js during postbuild.
- * This replaces Next.js's generated standalone server with a version
- * that NEVER calls process.exit() — preventing Hostinger's restart loop
- * when a secondary worker gets EADDRINUSE.
- *
- * How it works:
- *  1. Quick TCP probe: if port is already bound → park as secondary (poll for takeover)
- *  2. If port is free → intercept process.exit + uncaughtException, then load real Next.js server
- *  3. If primary dies later → secondary detects it and takes over
+ * Critical fixes vs previous versions:
+ *  1. HOSTNAME always '0.0.0.0' (never process.env.HOSTNAME which is the
+ *     machine name on Linux, not a bind address)
+ *  2. process.exit intercepted for ALL codes (0 and non-zero)
+ *     Next.js standalone may call exit(0) on EADDRINUSE
+ *  3. keepAlive setInterval so event loop never drains naturally
+ *  4. Unhandled rejection + uncaughtException → park instead of crash
  */
 
 'use strict';
 
-const net = require('net');
+const net  = require('net');
 const path = require('path');
 
-const PORT     = parseInt(process.env.PORT, 10) || 3000;
-const HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
+const PORT = parseInt(process.env.PORT, 10) || 3000;
+// CRITICAL: always use 0.0.0.0 — process.env.HOSTNAME on Linux is the
+// machine hostname (e.g. srv123.hostinger.com), NOT a valid bind address
+const BIND = '0.0.0.0';
 
-console.log(`[FSH] PID=${process.pid} starting on PORT=${PORT}`);
+console.log(`[FSH] PID=${process.pid} wrapper starting — PORT=${PORT}`);
 
-// ── TCP port probe ────────────────────────────────────────────────────────────
-// Returns 'free' | 'busy' | 'error'
-function probePort(callback) {
+// ── Keep the event loop alive permanently so natural drain can't exit us ───────
+const _keepAlive = setInterval(() => {}, 60_000);
+
+// ── Track graceful shutdown so we don't block SIGTERM ─────────────────────────
+let _shuttingDown = false;
+const _onShutdown = () => {
+  _shuttingDown = true;
+  clearInterval(_keepAlive);
+  console.log(`[FSH] PID=${process.pid} shutdown signal received`);
+};
+process.once('SIGTERM', _onShutdown);
+process.once('SIGINT',  _onShutdown);
+
+// ── Intercept process.exit for ALL codes (including 0) ────────────────────────
+const _originalExit = process.exit.bind(process);
+process.exit = function (code) {
+  if (_shuttingDown) {
+    // Allow exit only during SIGTERM-triggered shutdown
+    _originalExit(code);
+    return;
+  }
+  console.warn(`[FSH] PID=${process.pid} process.exit(${code}) suppressed → parking`);
+  startPolling();  // poll to take over when primary slot is free
+};
+
+// ── Global error handlers → park instead of crash ─────────────────────────────
+process.on('uncaughtException', (err) => {
+  console.error(`[FSH] uncaughtException: ${err.code || ''} ${err.message}`);
+  // Don't re-throw — keepAlive keeps us running
+});
+
+process.on('unhandledRejection', (reason) => {
+  const msg = reason instanceof Error ? reason.message : String(reason);
+  console.error(`[FSH] unhandledRejection: ${msg}`);
+  // Don't re-throw
+});
+
+// ── Port probe (using fixed BIND address) ─────────────────────────────────────
+function probePort(cb) {
   const tester = net.createServer();
   tester.once('error', (err) => {
     tester.close();
-    callback(err.code === 'EADDRINUSE' ? 'busy' : 'error');
+    cb(err.code === 'EADDRINUSE');  // true = busy, false = other error (treat as free)
   });
   tester.once('listening', () => {
-    tester.close(() => callback('free'));
+    tester.close(() => cb(false));  // false = port is free
   });
-  tester.listen(PORT, HOSTNAME);
+  tester.listen(PORT, BIND);
 }
 
-// ── Secondary mode: poll until primary dies, then take over ──────────────────
-function runAsSecondary() {
-  console.log(`[FSH] PID=${process.pid} → SECONDARY (port busy), polling for takeover`);
-  const poll = setInterval(() => {
-    probePort((status) => {
-      if (status === 'free') {
-        clearInterval(poll);
-        console.log(`[FSH] PID=${process.pid} primary died → taking over`);
-        runAsPrimary();
-      }
-    });
-  }, 5000); // check every 5s
-}
-
-// ── Primary mode: load the real Next.js standalone server ────────────────────
-function runAsPrimary() {
-  console.log(`[FSH] PID=${process.pid} → PRIMARY`);
-
-  // Intercept process.exit so crashes don't trigger Hostinger restart loop.
-  // We allow exit(0) (graceful shutdown) but park on error exits.
-  const _exit = process.exit.bind(process);
-  process.exit = function (code) {
-    if (code === 0) {
-      _exit(0);
-      return;
-    }
-    console.warn(`[FSH] process.exit(${code}) suppressed → parking`);
-    runAsSecondary();
-  };
-
-  // Catch EADDRINUSE and any other uncaught errors from Next.js internals
-  process.once('uncaughtException', (err) => {
-    if (err.code === 'EADDRINUSE') {
-      console.log(`[FSH] EADDRINUSE caught → secondary`);
-      runAsSecondary();
-      return;
-    }
-    console.error('[FSH] Uncaught exception:', err.message);
-    // Park instead of crashing to avoid restart loop
-    runAsSecondary();
-  });
-
-  process.once('unhandledRejection', (reason) => {
-    const msg = reason instanceof Error ? reason.message : String(reason);
-    if (msg.includes('EADDRINUSE') || (reason && reason.code === 'EADDRINUSE')) {
-      console.log('[FSH] EADDRINUSE rejection → secondary');
-      runAsSecondary();
-      return;
-    }
-    console.error('[FSH] Unhandled rejection:', msg);
-    runAsSecondary();
-  });
-
-  // Load the REAL Next.js standalone server (renamed to server_nextjs.js in postbuild)
+// ── Start Next.js standalone server ───────────────────────────────────────────
+let _loaded = false;
+function startServer() {
+  if (_loaded) return;
+  _loaded = true;
+  console.log(`[FSH] PID=${process.pid} → starting Next.js standalone server`);
   const serverPath = path.join(__dirname, 'server_nextjs.js');
   try {
     require(serverPath);
   } catch (e) {
     if (e.code === 'ERR_REQUIRE_ESM') {
-      // Next.js standalone uses ESM in some versions — use dynamic import
+      console.log('[FSH] ESM module detected, using dynamic import');
       import(serverPath).catch((err) => {
         console.error('[FSH] ESM import failed:', err.message);
-        runAsSecondary();
+        _loaded = false; // allow retry
       });
     } else {
       console.error('[FSH] Failed to load server_nextjs.js:', e.message);
-      runAsSecondary();
+      _loaded = false;
     }
   }
 }
 
+// ── Poll until we can become primary ──────────────────────────────────────────
+let _polling = false;
+function startPolling() {
+  if (_polling) return;
+  _polling = true;
+  console.log(`[FSH] PID=${process.pid} parking — polling every 6s for primary slot`);
+  const interval = setInterval(() => {
+    probePort((busy) => {
+      if (!busy) {
+        clearInterval(interval);
+        _polling = false;
+        _loaded = false;
+        console.log(`[FSH] PID=${process.pid} primary slot free — taking over`);
+        startServer();
+      }
+    });
+  }, 6000);
+}
+
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
-probePort((status) => {
-  if (status === 'free') {
-    runAsPrimary();
+probePort((busy) => {
+  if (busy) {
+    console.log(`[FSH] PID=${process.pid} port ${PORT} busy → secondary`);
+    startPolling();
   } else {
-    // busy OR probe error → stand by as secondary
-    runAsSecondary();
+    console.log(`[FSH] PID=${process.pid} port ${PORT} free → primary`);
+    startServer();
   }
 });
