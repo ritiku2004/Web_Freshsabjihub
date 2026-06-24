@@ -1,27 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Limit CPU usage on shared hosting
+  // Limit CPU usage on shared Hostinger hosting
   experimental: {
     cpus: 1,
     workerThreads: false,
   },
 
-  // Add headers to prevent stale Server Action calls from old deployments
   async headers() {
     return [
       {
-        // Tell browsers/CDN not to cache Next.js internal routes
-        source: '/_next/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
-        // Prevent caching of HTML pages so users always get the latest build
-        source: '/(.*)',
+        // Prevent browsers from caching HTML pages across deployments.
+        // This stops "Failed to find Server Action" errors caused by a
+        // browser serving stale JS that references old build's action IDs.
+        // Do NOT add custom Cache-Control for /_next/* — Next.js manages those.
+        source: '/((?!_next).*)',
         headers: [
           {
             key: 'Cache-Control',
@@ -32,7 +24,7 @@ const nextConfig = {
     ];
   },
 
-  // Redirect HTTP → HTTPS
+  // Redirect HTTP → HTTPS (Hostinger uses x-forwarded-proto header)
   async redirects() {
     return [
       {

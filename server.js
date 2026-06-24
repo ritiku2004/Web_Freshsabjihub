@@ -1,176 +1,105 @@
 /**
- * FreshSabjiHub - Production Server
+ * FreshSabjiHub - Hostinger-Compatible Production Server
  *
- * Designed for Hostinger Node.js hosting which spawns multiple processes.
- * Key guarantees:
- *  1. NEVER calls process.exit() on EADDRINUSE — avoids restart loops.
- *  2. Only one worker actually binds the port (lock-file based).
- *  3. Secondary workers park in a tight sleep loop — no crash = no respawn.
- *  4. Lock is refreshed every 10s so stale-lock detection works reliably.
+ * IMPORTANT: Hostinger's Node.js hosting runs its own process manager that
+ * bypasses 'npm start' and executes Next.js startup code directly. Our
+ * custom lock-file mechanism never runs. This file now wraps Next.js's own
+ * HTTP server with a minimal EADDRINUSE guard so secondary workers never
+ * crash → no restart loops.
+ *
+ * Startup messages you'll see in Hostinger logs:
+ *   "▲ Next.js 16.2.9 / ✓ Ready in 0ms"
+ * Those come from Next.js itself during app.prepare() — that's normal.
  */
 
 'use strict';
 
-const { createServer } = require('http');
+const http  = require('http');
 const { parse } = require('url');
-const next = require('next');
-const path = require('path');
-const fs = require('fs');
+const next  = require('next');
+const path  = require('path');
+const net   = require('net');
 
 const PORT = parseInt(process.env.PORT, 10) || 3000;
-const LOCK_FILE = '/tmp/fshjhub_v2.lock';
-const LOCK_REFRESH_MS = 10_000;   // refresh every 10 s
-const LOCK_STALE_MS  = 25_000;   // consider stale after 25 s
-
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
-const pid = process.pid;
-console.log(`[FSH] PID=${pid} starting (PORT=${PORT})`);
+// ── Keep process alive indefinitely (no exit = no Hostinger restart loop) ──
+function parkForever(reason) {
+  console.log(`[FSH] PID=${process.pid} parked (${reason}) – no restart needed`);
+  // Dummy interval keeps the event loop running so Hostinger won't kill us
+  setInterval(() => {}, 60_000);
+}
 
-// ─── Atomic lock helpers ──────────────────────────────────────────────────────
+// ── Quick port probe: returns true if port is FREE, false if already in use ──
+function isPortFree(port) {
+  return new Promise((resolve) => {
+    const tester = net.createServer();
+    tester.once('error', (err) => {
+      tester.close();
+      resolve(err.code !== 'EADDRINUSE'); // port busy = false
+    });
+    tester.once('listening', () => {
+      tester.close(() => resolve(true)); // port free = true
+    });
+    tester.listen(port, '0.0.0.0');
+  });
+}
 
-/**
- * Lock file format: "<pid>:<unixMs>"
- * Returns true if we successfully became the lock holder.
- */
-function tryAcquireLock() {
-  try {
-    if (fs.existsSync(LOCK_FILE)) {
-      const raw = fs.readFileSync(LOCK_FILE, 'utf8').trim();
-      const [storedPid, storedTs] = raw.split(':').map(Number);
-      const age = Date.now() - (storedTs || 0);
+async function main() {
+  console.log(`[FSH] PID=${process.pid} starting on PORT=${PORT}`);
 
-      if (!isNaN(storedPid) && age < LOCK_STALE_MS) {
-        // Lock is fresh — check if that PID is alive
-        try {
-          process.kill(storedPid, 0);
-          return false; // still alive → we are a secondary
-        } catch (_) {
-          // PID is dead — fall through and take over
-          console.log(`[FSH] PID=${pid} detected dead primary PID=${storedPid}, taking over`);
-        }
-      }
-      // Stale or dead — remove
-      try { fs.unlinkSync(LOCK_FILE); } catch (_) {}
-    }
-
-    fs.writeFileSync(LOCK_FILE, `${pid}:${Date.now()}`, 'utf8');
-    return true;
-  } catch (err) {
-    console.error('[FSH] Lock error:', err.message);
-    return false;
+  // Fast port probe before doing expensive app.prepare()
+  // This avoids two workers both spending ~1s on preparation.
+  const free = await isPortFree(PORT);
+  if (!free) {
+    // Another worker already owns the port → we are a secondary.
+    // Do NOT exit — just park so Hostinger doesn't spawn yet another worker.
+    console.log(`[FSH] PID=${process.pid} port ${PORT} already in use → secondary worker`);
+    parkForever('port-busy');
+    return;
   }
-}
 
-function refreshLock() {
-  try {
-    // Only refresh if we still own it
-    const raw = fs.existsSync(LOCK_FILE)
-      ? fs.readFileSync(LOCK_FILE, 'utf8').trim()
-      : '';
-    const [storedPid] = raw.split(':').map(Number);
-    if (storedPid === pid) {
-      fs.writeFileSync(LOCK_FILE, `${pid}:${Date.now()}`, 'utf8');
-    }
-  } catch (_) {}
-}
-
-function releaseLock() {
-  try {
-    const raw = fs.existsSync(LOCK_FILE)
-      ? fs.readFileSync(LOCK_FILE, 'utf8').trim()
-      : '';
-    const [storedPid] = raw.split(':').map(Number);
-    if (storedPid === pid) fs.unlinkSync(LOCK_FILE);
-  } catch (_) {}
-}
-
-// ─── Primary: actually starts Next.js and binds the port ─────────────────────
-
-function startPrimary() {
-  console.log(`[FSH] PID=${pid} → PRIMARY`);
-
-  // Refresh lock periodically so secondaries detect we're alive
-  const refreshInterval = setInterval(refreshLock, LOCK_REFRESH_MS);
-
-  // Release lock cleanly on exit
-  const cleanup = () => {
-    clearInterval(refreshInterval);
-    releaseLock();
-  };
-  process.once('exit',   cleanup);
-  process.once('SIGTERM', () => { cleanup(); process.exit(0); });
-  process.once('SIGINT',  () => { cleanup(); process.exit(0); });
-
+  // We won the port probe — prepare and start Next.js.
   const app = next({ dev: false, dir: path.join(__dirname) });
   const handle = app.getRequestHandler();
 
-  app.prepare()
-    .then(() => {
-      const server = createServer((req, res) => {
-        const parsedUrl = parse(req.url, true);
-        handle(req, res, parsedUrl);
-      });
-
-      server.on('error', (err) => {
-        if (err.code === 'EADDRINUSE') {
-          // Port in use — another primary already holds it.
-          // Stand down gracefully WITHOUT exiting (avoids restart loop).
-          console.warn(`[FSH] PID=${pid} port ${PORT} already in use, standing down as secondary`);
-          clearInterval(refreshInterval);
-          releaseLock();
-          standByAsSecondary();
-          return;
-        }
-        // Unexpected server error — log but do NOT exit
-        console.error(`[FSH] Server error: ${err.message}`);
-      });
-
-      server.listen(PORT, '0.0.0.0', () => {
-        console.log(`[FSH] PID=${pid} ✓ Listening on http://0.0.0.0:${PORT}`);
-      });
-    })
-    .catch((err) => {
-      // Next.js failed to prepare — log but keep process alive
-      console.error('[FSH] Next.js prepare() failed:', err.message || err);
-      clearInterval(refreshInterval);
-      releaseLock();
-      // Park the process to avoid Hostinger respawn loop
-      parkForever('prepare-error');
-    });
-}
-
-// ─── Secondary: parks without crashing ───────────────────────────────────────
-
-function standByAsSecondary() {
-  console.log(`[FSH] PID=${pid} → SECONDARY (polling for primary death)`);
-
-  const poll = setInterval(() => {
-    if (tryAcquireLock()) {
-      clearInterval(poll);
-      startPrimary();
-    }
-  }, 6000 + Math.floor(Math.random() * 2000)); // 6-8s poll with jitter
-}
-
-/**
- * Keep process alive indefinitely without consuming CPU.
- * Used when we can't start but don't want Hostinger to restart us.
- */
-function parkForever(reason) {
-  console.log(`[FSH] PID=${pid} parked indefinitely (reason: ${reason})`);
-  setInterval(() => {}, 60_000); // no-op timer keeps event loop alive
-}
-
-// ─── Bootstrap ───────────────────────────────────────────────────────────────
-
-// Stagger startup with jitter to reduce simultaneous lock contention
-const jitter = Math.floor(Math.random() * 500); // 0–500 ms
-
-setTimeout(() => {
-  if (tryAcquireLock()) {
-    startPrimary();
-  } else {
-    standByAsSecondary();
+  try {
+    await app.prepare();
+  } catch (err) {
+    console.error('[FSH] app.prepare() failed:', err.message || err);
+    parkForever('prepare-error');
+    return;
   }
-}, jitter);
+
+  const server = http.createServer((req, res) => {
+    handle(req, res, parse(req.url, true));
+  });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      // Lost the race between probe and listen (tiny window) → park gracefully
+      console.warn(`[FSH] PID=${process.pid} EADDRINUSE after probe → secondary`);
+      server.close();
+      parkForever('eaddrinuse-after-probe');
+      return;
+    }
+    // Any other server error — log but keep process alive
+    console.error(`[FSH] Server error: ${err.message}`);
+  });
+
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`[FSH] PID=${process.pid} ✓ Primary – listening on http://0.0.0.0:${PORT}`);
+  });
+
+  // Graceful shutdown signals
+  const shutdown = () => {
+    server.close(() => process.exit(0));
+  };
+  process.once('SIGTERM', shutdown);
+  process.once('SIGINT',  shutdown);
+}
+
+main().catch((err) => {
+  console.error('[FSH] Unhandled startup error:', err);
+  parkForever('unhandled-error');
+});
