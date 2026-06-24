@@ -70,7 +70,7 @@ function CheckoutContent() {
         discountAmount: cartSavings,
         handlingFee: handlingFee,
         deliveryFee: deliveryFee,
-        paymentMethod: paymentMethod === 'prepaid' ? 'prepaid' : 'cod',
+        paymentMethod: paymentMethod === 'prepaid' ? 'ONLINE' : 'COD',
       };
 
       const result = await api.createOrder(orderPayload, token);
