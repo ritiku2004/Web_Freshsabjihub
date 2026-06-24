@@ -19,10 +19,15 @@ const net       = require('net');
 const path      = require('path');
 const fs        = require('fs');
 
-const PORT            = parseInt(process.env.PORT, 10) || 3000;
+let PORT = process.env.PORT || 3000;
+const isSocket = typeof PORT === 'string' && (PORT.startsWith('/') || PORT.startsWith('\\'));
+
+if (!isSocket) {
+  PORT = parseInt(PORT, 10) || 3000;
+}
 const STANDALONE_SERVER = path.join(__dirname, '.next', 'standalone', 'server.js');
 
-console.log(`[FSH] PID=${process.pid} root-server starting on PORT=${PORT}`);
+console.log(`[FSH] PID=${process.pid} root-server starting, PORT=${PORT} (isSocket=${isSocket})`);
 
 // Verify standalone server exists
 if (!fs.existsSync(STANDALONE_SERVER)) {
@@ -78,10 +83,15 @@ function spawnPrimary() {
 }
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
-isPortFree((free) => {
-  if (free) {
-    spawnPrimary();
-  } else {
-    parkAndPoll('port-busy-on-start');
-  }
-});
+if (isSocket) {
+  console.log(`[FSH] PID=${process.pid} Unix socket detected → spawning primary directly`);
+  spawnPrimary();
+} else {
+  isPortFree((free) => {
+    if (free) {
+      spawnPrimary();
+    } else {
+      parkAndPoll('port-busy-on-start');
+    }
+  });
+}

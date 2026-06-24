@@ -15,12 +15,17 @@
 const net  = require('net');
 const path = require('path');
 
-const PORT = parseInt(process.env.PORT, 10) || 3000;
+let PORT = process.env.PORT || 3000;
+const isSocket = typeof PORT === 'string' && (PORT.startsWith('/') || PORT.startsWith('\\'));
+
+if (!isSocket) {
+  PORT = parseInt(PORT, 10) || 3000;
+}
 // CRITICAL: always use 0.0.0.0 — process.env.HOSTNAME on Linux is the
 // machine hostname (e.g. srv123.hostinger.com), NOT a valid bind address
 const BIND = '0.0.0.0';
 
-console.log(`[FSH] PID=${process.pid} wrapper starting — PORT=${PORT}`);
+console.log(`[FSH] PID=${process.pid} wrapper starting — PORT=${PORT} (isSocket=${isSocket})`);
 
 // ── Keep the event loop alive permanently so natural drain can't exit us ───────
 const _keepAlive = setInterval(() => {}, 60_000);
@@ -115,12 +120,17 @@ function startPolling() {
 }
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
-probePort((busy) => {
-  if (busy) {
-    console.log(`[FSH] PID=${process.pid} port ${PORT} busy → secondary`);
-    startPolling();
-  } else {
-    console.log(`[FSH] PID=${process.pid} port ${PORT} free → primary`);
-    startServer();
-  }
-});
+if (isSocket) {
+  console.log(`[FSH] PID=${process.pid} Unix socket detected (${PORT}) → Bypassing probe`);
+  startServer();
+} else {
+  probePort((busy) => {
+    if (busy) {
+      console.log(`[FSH] PID=${process.pid} port ${PORT} busy → secondary`);
+      startPolling();
+    } else {
+      console.log(`[FSH] PID=${process.pid} port ${PORT} free → primary`);
+      startServer();
+    }
+  });
+}
