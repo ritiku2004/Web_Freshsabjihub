@@ -17,7 +17,6 @@ export default function LocationModal({ isOpen, onClose }) {
   const [landmark, setLandmark] = useState('');
   const [receiverName, setReceiverName] = useState('');
   const [receiverMobile, setReceiverMobile] = useState('');
-  const [zipcode, setZipcode] = useState('');
 
   if (!isOpen) return null;
 
@@ -46,7 +45,7 @@ export default function LocationModal({ isOpen, onClose }) {
 
   const handleAddAddress = (e) => {
     e.preventDefault();
-    if (!flatNo || !addressLine || !receiverName || !receiverMobile || !zipcode) {
+    if (!flatNo || !addressLine || !receiverName || !receiverMobile) {
       setFormError('Please fill in all required fields.');
       return;
     }
@@ -58,7 +57,6 @@ export default function LocationModal({ isOpen, onClose }) {
       landmark,
       receiverName,
       receiverMobile,
-      zipcode,
       latitude: 28.6289,
       longitude: 77.3801,
     };
@@ -193,16 +191,6 @@ export default function LocationModal({ isOpen, onClose }) {
                   placeholder="Receiver's Mobile Number (Required)"
                   value={receiverMobile}
                   onChange={(e) => setReceiverMobile(e.target.value.replace(/\D/g, ''))}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <input
-                  type="text"
-                  placeholder="6-digit Zipcode (Required)"
-                  value={zipcode}
-                  onChange={(e) => setZipcode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   required
                 />
               </div>

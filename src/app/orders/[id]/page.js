@@ -87,7 +87,7 @@ export default function OrderDetailPage() {
   if (loading) {
     return (
       <div className={styles.loadingWrapper}>
-        <Loader text="Loading order details..." />
+        <Loader />
       </div>
     );
   }

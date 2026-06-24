@@ -65,7 +65,13 @@ export const api = {
   // Fetch nearest shop by latitude and longitude (15km radius check handled by backend)
   getNearestShop: async (latitude, longitude) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/user/catalog/nearest-shop?latitude=${latitude}&longitude=${longitude}`);
+      const lat = parseFloat(latitude);
+      const lng = parseFloat(longitude);
+      if (isNaN(lat) || isNaN(lng)) {
+        console.warn('Invalid coordinates passed to getNearestShop:', latitude, longitude);
+        return null;
+      }
+      const response = await fetch(`${API_BASE_URL}/user/catalog/nearest-shop?latitude=${lat}&longitude=${lng}`);
       if (!response.ok) {
         if (response.status === 404) return null; // No shop found
         throw new Error('Failed to fetch nearest shop');
@@ -429,6 +435,22 @@ export const api = {
     } catch (error) {
       console.error('Error in verifyPayment API:', error);
       throw error;
+    }
+  },
+
+  // Fetch all shops from backend
+  getShops: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/catalog/shops`);
+      if (!response.ok) {
+        console.error('Failed to fetch shops: server returned non-OK status');
+        return [];
+      }
+      const data = await response.json();
+      return data.data || [];
+    } catch (error) {
+      console.error('Error fetching shops:', error);
+      return [];
     }
   },
 };

@@ -31,11 +31,13 @@ export default function FloatingCart() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [shouldHide, cartTotalQuantity]);
 
+  const hasBottomBar = pathname.startsWith('/product') || pathname.startsWith('/orders/');
+
   if (shouldHide || cartTotalQuantity === 0) return null;
 
   return (
     <button
-      className={`${styles.floatingCart} ${visible ? styles.show : ''}`}
+      className={`${styles.floatingCart} ${visible ? styles.show : ''} ${hasBottomBar ? styles.onProductPage : ''}`}
       onClick={() => router.push('/cart')}
       aria-label="View Cart"
     >

@@ -230,7 +230,7 @@
 .logoutButton {
   width: 100%;
   background: #fef2f2;
-  border: 1px solid #fee2e2;
+  border: 1.5px solid #fca5a5;
   color: #ef4444;
   padding: 14px;
   font-size: 15px;
@@ -244,9 +244,10 @@
 }
 
 .logoutButton:hover {
-  background: #fee2e2;
-  border-color: #fca5a5;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.05);
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
 }
 
 /* ----- Modal Styling ----- */

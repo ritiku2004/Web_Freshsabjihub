@@ -4,7 +4,7 @@ import React from 'react';
 import { loaderBase64 } from './loaderBase64';
 import styles from './Loader.module.css';
 
-export default function Loader({ text = 'Freshness on the way' }) {
+export default function Loader() {
   const videoSrc = `data:video/webm;base64,${loaderBase64}`;
 
   return (
@@ -20,7 +20,7 @@ export default function Loader({ text = 'Freshness on the way' }) {
           <source src={videoSrc} type="video/webm" />
         </video>
       </div>
-      <p className={styles.tipText}>{text}</p>
+      <p className={styles.tipText}>Freshness on the way</p>
     </div>
   );
 }

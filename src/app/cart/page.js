@@ -7,13 +7,14 @@ import { useQuery } from '@tanstack/react-query';
 import { AuthContext } from '../../context/AuthContext';
 import { CartContext } from '../../context/CartContext';
 import SafeImage from '../../components/SafeImage';
+import Loader from '../../components/Loader';
 import { api } from '../../services/api';
 import { MOCK_CATEGORIES } from '../data';
 import styles from '../page.module.css';
 
 export default function CartPage() {
   const router = useRouter();
-  const { isAuthenticated, token, user, activeAddress, serviceAvailable, activeShop } = useContext(AuthContext);
+  const { isAuthenticated, token, user, activeAddress, serviceAvailable, activeShop, loading } = useContext(AuthContext);
   const {
     cartItems,
     cartSubtotal,
@@ -58,13 +59,17 @@ export default function CartPage() {
     }
   }
 
+  if (loading) {
+    return <Loader />;
+  }
+
   if (!activeAddress) {
     return (
       <div className={styles.emptyStateContainer}>
         <MapPin size={48} color="#64748b" />
         <h2 className={styles.emptyStateTitle}>Choose Delivery Location</h2>
         <p className={styles.emptyStateText}>
-          Please select a saved address or enter a valid zipcode to check serviceability and browse products.
+          Please select or add a saved address to check serviceability and browse products.
         </p>
       </div>
     );
@@ -76,7 +81,7 @@ export default function CartPage() {
         <AlertTriangle size={48} color="#ef4444" />
         <h2 className={styles.emptyStateTitle}>No Service Available</h2>
         <p className={styles.emptyStateText}>
-          We do not deliver to zipcode <strong>{activeAddress.zipcode}</strong>. We currently support select zipcodes of Noida and New Delhi (e.g. 10001 or 110070).
+          We currently do not support delivery to your selected location. Please select or add a different address.
         </p>
       </div>
     );
@@ -96,7 +101,7 @@ export default function CartPage() {
             </div>
             <h2 className={styles.emptyCartTitle}>Your cart is empty</h2>
             <p className={styles.emptyCartDescription}>
-              Add items to your cart to experience superfast 12-minute delivery at your doorstep!
+              Add items to your cart to experience fast delivery at your doorstep!
             </p>
             <button className={styles.startShoppingBtn} onClick={() => router.push('/')}>
               <span>Start Shopping</span>
