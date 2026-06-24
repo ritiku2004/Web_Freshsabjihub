@@ -453,4 +453,65 @@ export const api = {
       return [];
     }
   },
+
+  // Fetch user notifications from backend
+  fetchNotifications: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/notifications`, {
+        headers: getHeaders(),
+      });
+      if (!response.ok) throw new Error('Failed to fetch notifications');
+      const data = await response.json();
+      return data.data || [];
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      return [];
+    }
+  },
+
+  // Mark notification as read on backend
+  markNotificationRead: async (id) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/notifications/mark-read/${id}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+      });
+      if (!response.ok) throw new Error('Failed to mark notification as read');
+      return await response.json();
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      throw error;
+    }
+  },
+
+  // Mark all user notifications as read on backend
+  markAllNotificationsRead: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/notifications/mark-all-read`, {
+        method: 'PUT',
+        headers: getHeaders(),
+      });
+      if (!response.ok) throw new Error('Failed to mark all notifications as read');
+      return await response.json();
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      throw error;
+    }
+  },
+
+  // Clear all user notifications on backend
+  clearNotifications: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/notifications`, {
+        method: 'DELETE',
+        headers: getHeaders(),
+      });
+      if (!response.ok) throw new Error('Failed to clear notifications');
+      return await response.json();
+    } catch (error) {
+      console.error('Error clearing notifications:', error);
+      throw error;
+    }
+  },
 };
+
