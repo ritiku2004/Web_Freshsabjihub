@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "next build && echo '[POSTBUILD] Copying static assets...' && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static && echo '[POSTBUILD] Installing crash-proof server wrapper...' && mv .next/standalone/server.js .next/standalone/server_nextjs.js && cp hostinger-server.js .next/standalone/server.js && echo '[POSTBUILD] Done - hostinger-server.js is now .next/standalone/server.js'",
+    "build": "next build && echo '[POSTBUILD] Copying static assets...' && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static && echo '[POSTBUILD] Installing crash-proof server wrapper...' && mv .next/standalone/server.js .next/standalone/server_nextjs.js && cp hostinger-server.js .next/standalone/server.js && echo '[POSTBUILD] Copying standalone files to nodejs folder...' && mkdir -p ../nodejs && cp -r .next/standalone/. ../nodejs/ && echo '[POSTBUILD] Done - files copied to nodejs!'",
     "start": "node server.js",
     "lint": "eslint"
   },
