@@ -352,11 +352,6 @@ function CheckoutContent() {
               <span>₹{handlingFee}</span>
             </div>
 
-            <div className={styles.billingRow}>
-              <span>GST Tax (5%)</span>
-              <span>₹{Math.round(cartSubtotal * 0.05 * 100) / 100}</span>
-            </div>
-
             {driverTip > 0 && (
               <div className={styles.billingRow}>
                 <span>Driver Tip</span>

@@ -3,32 +3,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { api } from '../services/api';
 
-const DEFAULT_ADDRESSES = [
-  {
-    id: 'addr1',
-    type: 'Home',
-    flatNo: 'A-404, Green Heights',
-    addressLine: 'Sector 62, Noida, Uttar Pradesh',
-    landmark: 'Near Galaxy Business Park',
-    receiverName: 'John Doe',
-    receiverMobile: '9876543210',
-    zipcode: '10001',
-    latitude: 28.6289,
-    longitude: 77.3801,
-  },
-  {
-    id: 'addr2',
-    type: 'Office',
-    flatNo: 'Cabin 12, Level 5',
-    addressLine: 'Vasant Kunj Phase 2, New Delhi',
-    landmark: 'Opposite Vasant Square Mall',
-    receiverName: 'John Doe Office',
-    receiverMobile: '9876543210',
-    zipcode: '110070',
-    latitude: 28.5244,
-    longitude: 77.1557,
-  },
-];
+const DEFAULT_ADDRESSES = [];
 
 export const AuthContext = createContext({
   isAuthenticated: false,
@@ -63,7 +38,6 @@ export const AuthProvider = ({ children }) => {
     name: "Main Warehouse Noida",
     address: "Sector 62, Block C",
     city: "Noida",
-    zipcode: "10001",
     latitude: 28.6289,
     longitude: 77.3801,
   });
@@ -121,7 +95,6 @@ export const AuthProvider = ({ children }) => {
       landmark: addr.address_line2 || '',
       receiverName: addr.receiver_name || '',
       receiverMobile: addr.receiver_mobile || '',
-      zipcode: addr.zipcode || '',
       latitude: Number(addr.latitude) || 28.6139,
       longitude: Number(addr.longitude) || 77.2090,
     };
@@ -133,9 +106,6 @@ export const AuthProvider = ({ children }) => {
       title: addr.type || 'Home',
       address_line1: `${addr.flatNo || ''}||${addr.addressLine || ''}`,
       address_line2: addr.landmark || '',
-      city: 'City',
-      state: 'State',
-      zipcode: addr.zipcode,
       latitude: addr.latitude || 28.6139,
       longitude: addr.longitude || 77.2090,
       is_default: false,
@@ -259,9 +229,6 @@ export const AuthProvider = ({ children }) => {
               title: guestAddr.type || 'Other',
               address_line1: `${guestAddr.flatNo || ''}||${guestAddr.addressLine || ''}`,
               address_line2: guestAddr.landmark || '',
-              city: 'City',
-              state: 'State',
-              zipcode: guestAddr.zipcode,
               latitude: guestAddr.latitude,
               longitude: guestAddr.longitude,
               is_default: false,
@@ -290,7 +257,6 @@ export const AuthProvider = ({ children }) => {
               landmark: b.address_line2 || '',
               receiverName: b.receiver_name || userData.first_name || 'User',
               receiverMobile: b.receiver_mobile || userData.phone_number || '',
-              zipcode: b.zipcode,
               latitude: b.latitude,
               longitude: b.longitude,
             };
@@ -347,9 +313,8 @@ export const AuthProvider = ({ children }) => {
             title: newAddress.type || 'Other',
             address_line1: `${newAddress.flatNo || ''}||${newAddress.addressLine || ''}`,
             address_line2: newAddress.landmark || '',
-            city: 'City',
-            state: 'State',
-            zipcode: newAddress.zipcode,
+            city: newAddress.city || 'City',
+            state: newAddress.state || 'State',
             latitude: newAddress.latitude,
             longitude: newAddress.longitude,
             is_default: false,
@@ -460,7 +425,6 @@ export const AuthProvider = ({ children }) => {
             landmark: b.address_line2 || '',
             receiverName: b.receiver_name || user.first_name || 'User',
             receiverMobile: b.receiver_mobile || user.phone_number || '',
-            zipcode: b.zipcode,
             latitude: b.latitude,
             longitude: b.longitude,
           };
