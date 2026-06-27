@@ -112,14 +112,50 @@ export default function OrderDetailPage() {
 
   const grandTotalText = `₹${Number(order.billSummary.grandTotal).toFixed(2)}`;
 
+  const handleDownloadInvoice = async () => {
+    try {
+      const response = await api.get(`/user/orders/${order.id}/invoice`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Invoice-${order.orderNumber}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      alert('Failed to download invoice. Please try again.');
+    }
+  };
+
   return (
     <div className={styles.wrapper}>
       {/* Header */}
       <header className={styles.header}>
-        <button className={styles.backButton} onClick={() => router.back()} aria-label="Go back">
-          <ArrowLeft size={24} />
-        </button>
-        <h1 className={styles.headerTitle}>Order Details</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button className={styles.backButton} onClick={() => router.back()} aria-label="Go back">
+            <ArrowLeft size={24} />
+          </button>
+          <h1 className={styles.headerTitle}>Order Details</h1>
+        </div>
+        {!isPending && (
+          <button 
+            onClick={handleDownloadInvoice}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#e8f5e9',
+              color: '#2e7d32',
+              border: '1px solid #2e7d32',
+              borderRadius: '8px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '14px',
+              marginLeft: 'auto'
+            }}
+          >
+            Download Invoice
+          </button>
+        )}
       </header>
 
       {/* Main Content Wrap */}

@@ -180,7 +180,25 @@ export const AuthProvider = ({ children }) => {
               }
             }
             setLoading(false);
-          }).catch(() => {
+          }).catch((err) => {
+            if (err && err.isAuthError) {
+              // Token is expired — wipe session and redirect to logged-out state
+              console.warn('[AuthContext] Token expired on startup — logging out.');
+              localStorage.removeItem('user');
+              localStorage.removeItem('token');
+              localStorage.removeItem('addresses');
+              api.setToken(null);
+              setUser(null);
+              setToken(null);
+              setIsAuthenticated(false);
+              setAddresses(DEFAULT_ADDRESSES);
+              // Restore address from localStorage if available for guest browsing
+              if (storedAddress) {
+                try { updateLocationAndShop(JSON.parse(storedAddress)); } catch (e) { updateLocationAndShop(null); }
+              } else {
+                updateLocationAndShop(null);
+              }
+            }
             setLoading(false);
           });
         } catch (e) {

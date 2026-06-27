@@ -294,6 +294,14 @@
   margin-bottom: 14px;
 }
 
+.formLabel {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
 .formInput {
   width: 100%;
   padding: 13px 16px;
@@ -332,23 +340,21 @@
 }
 
 .currentLocationBtn {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  background: white;
-  border: none;
-  border-radius: 20px;
-  padding: 8px 14px;
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 12px;
+  background: #ecfdf5;
+  border: 1.5px dashed #10b981;
+  border-radius: 8px;
+  padding: 10px 16px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #10b981;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   transition: all 0.2s;
-  z-index: 1000;
 }
 
 .currentLocationBtn:hover {

@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useContext, useRef, useCallback, useState, useEffect } from 'react';
+import React, { useContext, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, ArrowRight, MapPin, AlertTriangle, Truck, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight, MapPin, AlertTriangle, Truck, Sparkles, Flame, Tag } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import BannerCarousel from '../components/BannerCarousel';
 import SafeImage from '../components/SafeImage';
@@ -30,6 +30,32 @@ function CategoryScrollArrows({ scrollRef }) {
     </div>
   );
 }
+
+function SpecialProductRow({ title, badge, badgeClass, products, router }) {
+  const scrollRef = useRef(null);
+
+  return (
+    <section className={styles.productSection} style={{ marginBottom: '8px' }}>
+      <div className={styles.sectionHeader}>
+        <div className={styles.sectionTitleGroup}>
+          <h2 className={styles.sectionTitle}>{title}</h2>
+          <span className={badgeClass}>{badge}</span>
+        </div>
+        <div className={styles.sectionActions}>
+          <CategoryScrollArrows scrollRef={scrollRef} />
+        </div>
+      </div>
+      <div className={styles.productsTrack} ref={scrollRef}>
+        {products.map((prod) => (
+          <div key={prod.id} className={styles.productSlide}>
+            <ProductCard product={prod} />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 
 function ProductRow({ cat, router, index }) {
   const scrollRef = useRef(null);
@@ -62,33 +88,6 @@ function ProductRow({ cat, router, index }) {
   );
 }
 
-function OrderAgainRow({ products, router }) {
-  const scrollRef = useRef(null);
-
-  return (
-    <section className={styles.productSection} style={{ marginBottom: '32px' }}>
-      <div className={styles.sectionHeader}>
-        <div className={styles.sectionTitleGroup}>
-          <h2 className={styles.sectionTitle}>Buy It Again</h2>
-          <span className={styles.productCount} style={{ color: '#16a34a', backgroundColor: '#dcfce7', fontSize: '11px', fontWeight: '800' }}>
-            Recently Ordered
-          </span>
-        </div>
-        <div className={styles.sectionActions}>
-          <CategoryScrollArrows scrollRef={scrollRef} />
-        </div>
-      </div>
-
-      <div className={styles.productsTrack} ref={scrollRef}>
-        {products.map((prod) => (
-          <div key={prod.id} className={styles.productSlide}>
-            <ProductCard product={prod} />
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 export default function Home() {
   const router = useRouter();
@@ -120,32 +119,8 @@ export default function Home() {
 
   const allProducts = productsData?.products || [];
 
-  const [reorderProducts, setReorderProducts] = useState([]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('pastOrders');
-      if (saved && allProducts.length > 0) {
-        try {
-          const orders = JSON.parse(saved);
-          const productIds = [];
-          orders.forEach(order => {
-            order.items?.forEach(item => {
-              if (item.productId && !productIds.includes(item.productId)) {
-                productIds.push(item.productId);
-              }
-            });
-          });
-          const matched = productIds
-            .map(id => allProducts.find(p => String(p.id) === String(id)))
-            .filter(Boolean);
-          setReorderProducts(matched);
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    }
-  }, [allProducts]);
+  const trendingProducts = allProducts.filter(p => p.type === 'trending');
+  const bestDealProducts = allProducts.filter(p => p.type === 'best_deal');
 
   // Group products by category for horizontal listing
   const categoriesWithProducts = categories.map((cat) => {
@@ -240,9 +215,27 @@ export default function Home() {
         </section>
       )}
 
-      {/* --- Order Again Row ----------------------------------- */}
-      {reorderProducts.length > 0 && (
-        <OrderAgainRow products={reorderProducts} router={router} />
+
+      {/* --- Trending Now Row --------------------------------- */}
+      {trendingProducts.length > 0 && (
+        <SpecialProductRow
+          title="Trending Now"
+          badge="🔥 Hot Picks"
+          badgeClass={styles.trendingBadge}
+          products={trendingProducts}
+          router={router}
+        />
+      )}
+
+      {/* --- Best Deals Row ----------------------------------- */}
+      {bestDealProducts.length > 0 && (
+        <SpecialProductRow
+          title="Best Deals"
+          badge="🏷️ Savings"
+          badgeClass={styles.bestDealBadge}
+          products={bestDealProducts}
+          router={router}
+        />
       )}
 
       {/* --- Category Product Rows ----------------------------- */}

@@ -33,6 +33,8 @@ function CheckoutContent() {
     cartSavings,
     deliveryFee,
     handlingFee,
+    globalDiscountAmount,
+    globalDiscountPercentage,
     cartGrandTotal,
     clearCart
   } = useContext(CartContext);
@@ -337,6 +339,13 @@ function CheckoutContent() {
               <div className={styles.billingRow}>
                 <span>Product Discount</span>
                 <span className={styles.savingsValue}>-₹{cartSavings}</span>
+              </div>
+            )}
+
+            {globalDiscountAmount > 0 && (
+              <div className={styles.billingRow}>
+                <span>Offers {globalDiscountPercentage > 0 ? `(${globalDiscountPercentage}%)` : ''}</span>
+                <span className={styles.savingsValue}>-₹{globalDiscountAmount}</span>
               </div>
             )}
 

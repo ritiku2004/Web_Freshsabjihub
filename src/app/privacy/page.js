@@ -9,7 +9,7 @@ export default function PrivacyPage() {
   const router = useRouter();
 
   const handleEmailClick = () => {
-    window.location.href = 'mailto:privacy@freshsabjihub.com';
+    window.location.href = 'mailto:security@freshsabjihub.com';
   };
 
   return (
@@ -63,7 +63,11 @@ export default function PrivacyPage() {
               <h3 className={styles.cardTitle}>2. Information We Collect</h3>
             </div>
             <p className={styles.cardBody}>
-              We collect information you voluntarily provide (name, email, phone number, address) when setting up your profile or checking out. We also gather automated device telemetry (IP address, operating system, unique identifiers) to help improve system stability.
+              We collect information you voluntarily provide (name, email, phone number, address) when setting up your profile or checking out. 
+              <br/><br/>
+              <b>Location Information:</b> We request access to your device's precise location (GPS) to accurately deliver your groceries and autofill your address. Location data is only used during active order fulfillment.
+              <br/><br/>
+              <b>Notifications:</b> We ask for notification permissions to send you real-time updates regarding your order status and delivery ETA.
             </p>
           </div>
 
@@ -113,7 +117,7 @@ export default function PrivacyPage() {
               <h3 className={styles.cardTitle}>6. Your Rights</h3>
             </div>
             <p className={styles.cardBody}>
-              You hold the right to view, modify, or delete your personal details. You can update your profile parameters or request account deletion at any time directly through the Profile panel in the app.
+              You hold the right to view, modify, or delete your personal details. You can update your profile parameters, address, and preferences, or request account deletion at any time directly through the Profile panel in the app. Data updates are synced immediately across both our mobile app and website.
             </p>
           </div>
 
@@ -131,7 +135,7 @@ export default function PrivacyPage() {
               className={styles.emailLinkButton}
             >
               <Mail size={16} color="#0f7643" />
-              <span className={styles.emailLinkText}>privacy@freshsabjihub.com</span>
+              <span className={styles.emailLinkText}>security@freshsabjihub.com</span>
             </button>
           </div>
 

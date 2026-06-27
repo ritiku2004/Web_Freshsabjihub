@@ -24,6 +24,9 @@ export default function CartPage() {
     cartGrandTotal,
     freeDeliveryThreshold,
     freeHandlingThreshold,
+    globalDiscountAmount,
+    globalDiscountPercentage,
+    globalDiscountThreshold,
     updateQuantity,
     clearCart
   } = useContext(CartContext);
@@ -245,6 +248,13 @@ export default function CartPage() {
               <div className={styles.billingRow}>
                 <span>Product Discount</span>
                 <span className={styles.savingsValue}>-₹{cartSavings}</span>
+              </div>
+            )}
+            
+            {globalDiscountAmount > 0 && (
+              <div className={styles.billingRow}>
+                <span>Offers {globalDiscountPercentage > 0 ? `(${globalDiscountPercentage}%)` : ''}</span>
+                <span className={styles.savingsValue}>-₹{globalDiscountAmount}</span>
               </div>
             )}
 

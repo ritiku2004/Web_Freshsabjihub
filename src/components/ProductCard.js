@@ -101,11 +101,7 @@ export default function ProductCard({ product }) {
           {name}
         </h4>
 
-        {/* Delivery Time Placeholder */}
-        <div className={styles.deliveryRow}>
-          <Clock size={12} className={styles.clockIcon} />
-          <span className={styles.deliveryText}>14 MINS</span>
-        </div>
+
 
         {/* Discount badge */}
         {hasDiscount && (

@@ -33,9 +33,9 @@ export default function TermsPage() {
     },
     {
       id: 3,
-      title: "3. Use of the App",
+      title: "3. Use of the App & Permissions",
       icon: <Smartphone size={20} />,
-      content: "You agree to use the App only for lawful, personal purposes. Violations or attempts to violate app security, including accessing unauthorized accounts or data scraping, will result in immediate termination."
+      content: "You agree to use the App only for lawful purposes. By using the app, you grant permission for location access (used solely for delivery accuracy) and notifications (used for order updates). Violations of security or data scraping will result in termination."
     },
     {
       id: 4,

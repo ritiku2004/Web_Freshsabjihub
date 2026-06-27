@@ -16,6 +16,7 @@ import {
   Edit2,
   Camera,
   ArrowLeft,
+  Package,
 } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 import { api } from '../../services/api';
@@ -89,7 +90,8 @@ export default function ProfilePage() {
         refreshProfile();
       }
     }
-  }, [router, refreshProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalDetails, setModalDetails] = useState({ title: '', content: '' });
@@ -297,6 +299,15 @@ export default function ProfilePage() {
 
         {/* Menu Options */}
         <div className={styles.menuContainer}>
+          {/* Order History */}
+          <button className={styles.menuItem} onClick={() => router.push('/orders')}>
+            <div className={styles.menuItemLeft}>
+              <Package size={20} />
+              <span className={styles.menuItemText}>Order History</span>
+            </div>
+            <ChevronRight size={18} className={styles.chevronRight} />
+          </button>
+
           {/* Address Book */}
           <button className={styles.menuItem} onClick={() => router.push('/addresses')}>
             <div className={styles.menuItemLeft}>

@@ -417,20 +417,22 @@ export default function AddressesPage() {
                 {/* Form Fields */}
                 <div className={styles.formGrid}>
                   <div className={styles.formGroup}>
+                    <label className={styles.formLabel}>Receiver's Full Name *</label>
                     <input
                       type="text"
                       className={styles.formInput}
-                      placeholder="Receiver's Full Name"
+                      placeholder="e.g. John Doe"
                       value={receiverName}
                       onChange={(e) => setReceiverName(e.target.value)}
                     />
                   </div>
 
                   <div className={styles.formGroup}>
+                    <label className={styles.formLabel}>Receiver's Mobile Number *</label>
                     <input
                       type="tel"
                       className={styles.formInput}
-                      placeholder="Receiver's Mobile Number"
+                      placeholder="10-digit mobile number"
                       value={receiverMobile}
                       onChange={(e) => setReceiverMobile(e.target.value.replace(/[^0-9]/g, ''))}
                       maxLength={10}
@@ -438,6 +440,7 @@ export default function AddressesPage() {
                   </div>
 
                   <div className={styles.formGroup}>
+                    <label className={styles.formLabel}>Delivery City *</label>
                     <select
                       className={styles.formSelect}
                       value={city}
@@ -459,30 +462,33 @@ export default function AddressesPage() {
                   </div>
 
                   <div className={styles.formGroup}>
+                    <label className={styles.formLabel}>Area / Colony / Sector *</label>
                     <input
                       type="text"
                       className={styles.formInput}
-                      placeholder="Area / Sector / Street / Locality"
+                      placeholder="e.g. Bapu Nagar"
                       value={addressLine}
                       onChange={(e) => { isTypingRef.current = true; setAddressLine(e.target.value); }}
                     />
                   </div>
 
                   <div className={styles.formGroup}>
+                    <label className={styles.formLabel}>House No. / Building / Floor *</label>
                     <input
                       type="text"
                       className={styles.formInput}
-                      placeholder="Flat / House No. / Floor / Building"
+                      placeholder="e.g. Flat 101, A-Wing"
                       value={flatNo}
                       onChange={(e) => setFlatNo(e.target.value)}
                     />
                   </div>
 
                   <div className={styles.formGroup}>
+                    <label className={styles.formLabel}>Nearby Landmark</label>
                     <input
                       type="text"
                       className={styles.formInput}
-                      placeholder="Nearby Landmark (e.g. Near Mall)"
+                      placeholder="e.g. Near City Mall"
                       value={landmark}
                       onChange={(e) => { isTypingRef.current = true; setLandmark(e.target.value); }}
                     />
@@ -491,13 +497,13 @@ export default function AddressesPage() {
               </div>
 
               <div className={styles.mapCol}>
-                {/* Map */}
+                <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#111827', marginTop: '10px', marginBottom: '10px' }}>Select your exact delivery location *</h3>
+                <button className={styles.currentLocationBtn} onClick={handleCurrentLocation}>
+                  <Navigation size={14} />
+                  <span>Use Current Location</span>
+                </button>
                 <div className={styles.mapContainer}>
                   <div ref={mapRef} className={styles.mapView} />
-                  <button className={styles.currentLocationBtn} onClick={handleCurrentLocation}>
-                    <Navigation size={14} />
-                    <span>Current Location</span>
-                  </button>
                 </div>
               </div>
             </div>

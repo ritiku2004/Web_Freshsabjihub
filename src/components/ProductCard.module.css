@@ -1,20 +1,20 @@
 .card {
   background: white;
   border-radius: 16px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid #e8ecf1;
   width: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.03);
-  border-color: #e2e8f0;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
 }
 
 .outOfStockCard {
@@ -24,10 +24,11 @@
 
 .imageContainer {
   height: 160px;
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #ffffff;
   position: relative;
   width: 100%;
   overflow: visible;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .image {
@@ -35,11 +36,12 @@
   height: 100%;
   object-fit: cover;
   padding: 0;
+  display: block;
   transition: transform 0.3s ease;
 }
 
 .card:hover .image {
-  transform: scale(1.04);
+  transform: scale(1.06);
 }
 
 .outOfStockOverlay {
@@ -254,7 +256,7 @@
   }
 
   .image {
-    padding: 8px;
+    padding: 0;
   }
 
   .infoContainer {

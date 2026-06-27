@@ -92,19 +92,10 @@
   width: fit-content;
 }
 
-.logoIconBg {
-  background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
-}
-
-.logoLeaf {
-  color: white;
+.logoImage {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
 }
 
 .logoText {

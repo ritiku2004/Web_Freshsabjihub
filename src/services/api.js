@@ -3,8 +3,13 @@ export const getApiBaseUrl = () => {
     return 'https://api.freshsabjihub.com/api/v1';
   }
   const hostname = window.location.hostname;
-  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.')) {
-    return 'http://localhost:5000/api/v1';
+  if (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname.startsWith('192.168.') ||
+    hostname.startsWith('10.')
+  ) {
+    return `http://${hostname === 'localhost' || hostname === '127.0.0.1' ? 'localhost' : '10.208.76.238'}:5000/api/v1`;
   }
   return 'https://api.freshsabjihub.com/api/v1';
 };
@@ -147,6 +152,7 @@ export const api = {
           unit: `${p.quantity} ${p.quantity_type}`,
           stock: p.is_available !== false ? 50 : 0,
           rating: 4.5,
+          type: p.type || 'general',
         };
       });
 
@@ -288,12 +294,17 @@ export const api = {
       const response = await fetch(`${API_BASE_URL}/user/auth/addresses`, {
         headers: getHeaders(),
       });
+      if (response.status === 401) {
+        const err = new Error('Session expired');
+        err.isAuthError = true;
+        throw err;
+      }
       if (!response.ok) throw new Error('Failed to fetch addresses');
       const data = await response.json();
       return data.data || [];
     } catch (error) {
       console.error('Error fetching addresses:', error);
-      return [];
+      throw error; // re-throw so callers can handle 401
     }
   },
 

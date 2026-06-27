@@ -70,9 +70,7 @@ export default function Footer() {
           {/* Brand Info */}
           <div className={styles.brandSection}>
             <div className={styles.logoRow} onClick={() => router.push('/')}>
-              <div className={styles.logoIconBg}>
-                <Leaf size={22} className={styles.logoLeaf} />
-              </div>
+              <img src="/logo.png" alt="Fresh Sabji Hub Logo" className={styles.logoImage} />
               <span className={styles.logoText}>Fresh Sabji Hub</span>
             </div>
             <p className={styles.brandTagline}>
