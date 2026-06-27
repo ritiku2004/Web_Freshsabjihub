@@ -122,14 +122,22 @@ export default function OrderDetailPage() {
         }
       });
       if (!response.ok) throw new Error('Failed to fetch invoice');
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `Invoice-${order.orderNumber}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const data = await response.json();
+      if (!data.success || !data.html) throw new Error('Invalid invoice data received');
+      
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+      iframe.contentDocument.open();
+      iframe.contentDocument.write(data.html);
+      iframe.contentDocument.close();
+      
+      iframe.onload = () => {
+        setTimeout(() => {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+        }, 500); // Wait for fonts and images to load
+      };
     } catch (error) {
       console.error('Error downloading invoice:', error);
       alert('Failed to download invoice. Please try again.');
