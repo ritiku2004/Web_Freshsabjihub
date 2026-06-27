@@ -109,9 +109,9 @@ export default function Navbar({
           {/* Center Left Section: Refined Delivery Info */}
           <div className={styles.deliverySection} onClick={() => router.push('/addresses')}>
             <div className={styles.etaBadge}>
-              <span className={styles.deliverLabel}>DELIVER IN</span>
+              <span className={styles.deliverLabel}>{!activeAddress ? 'SET YOUR' : 'DELIVER IN'}</span>
               <span className={styles.etaText}>
-                {serviceAvailable ? (deliveryETA ? `${deliveryETA} MINS` : '---') : 'Out of Zone'}
+                {!activeAddress ? 'Location' : serviceAvailable ? (deliveryETA ? `${deliveryETA} MINS` : '---') : 'Out of Zone'}
               </span>
             </div>
             <div className={styles.addressBox}>

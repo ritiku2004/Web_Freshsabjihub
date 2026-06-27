@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback, useRef } from 'react';
 import { api } from '../services/api';
 import { AuthContext } from './AuthContext';
 
@@ -22,6 +22,16 @@ export const NotificationProvider = ({ children }) => {
   const { isAuthenticated, user } = useContext(AuthContext);
   const [notifications, setNotifications] = useState([]);
   const [tick, setTick] = useState(0);
+  const seenIdsRef = useRef(new Set());
+
+  // Request browser notification permissions
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+  }, []);
 
   // Periodic ticker to refresh relative times every 30 seconds
   useEffect(() => {
@@ -45,7 +55,20 @@ export const NotificationProvider = ({ children }) => {
           clickable: !!(n.data?.orderId || n.type),
           createdAt: n.createdAt
         }));
+        
         setNotifications(mappedList);
+
+        // Check for new unread notifications and trigger browser push
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+          if (Notification.permission === 'granted') {
+            mappedList.forEach(notif => {
+              if (!notif.isRead && !seenIdsRef.current.has(notif.id)) {
+                new Notification(notif.title, { body: notif.message, icon: '/favicon.png' });
+                seenIdsRef.current.add(notif.id);
+              }
+            });
+          }
+        }
       } catch (err) {
         console.error('[NotificationContext] Failed to fetch notifications from backend:', err);
       }
@@ -92,6 +115,16 @@ export const NotificationProvider = ({ children }) => {
   useEffect(() => {
     loadNotifications();
   }, [loadNotifications]);
+
+  // Poll for new notifications every 30 seconds if authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const timer = setInterval(() => {
+        loadNotifications();
+      }, 30_000);
+      return () => clearInterval(timer);
+    }
+  }, [isAuthenticated, loadNotifications]);
 
   const saveGuestNotifications = (newList) => {
     setNotifications(newList);

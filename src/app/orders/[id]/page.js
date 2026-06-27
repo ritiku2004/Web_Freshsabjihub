@@ -7,6 +7,7 @@ import SafeImage from '../../../components/SafeImage';
 import Loader from '../../../components/Loader';
 import { INITIAL_ORDERS, MOCK_PRODUCTS } from '../../data';
 import styles from './page.module.css';
+import { API_BASE_URL } from '../../../services/api';
 
 export default function OrderDetailPage() {
   const { id } = useParams();
@@ -114,8 +115,15 @@ export default function OrderDetailPage() {
 
   const handleDownloadInvoice = async () => {
     try {
-      const response = await api.get(`/user/orders/${order.id}/invoice`, { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      const token = localStorage.getItem('token') || '';
+      const response = await fetch(`${API_BASE_URL}/user/orders/${order.id}/invoice`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch invoice');
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `Invoice-${order.orderNumber}.pdf`);
