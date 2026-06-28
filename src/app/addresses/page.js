@@ -244,10 +244,10 @@ export default function AddressesPage() {
               // Lock map bounds and minZoom to keep user within radius
               const bounds = window.L.latLng(lat, lng).toBounds(radius * 2);
               leafletMapRef.current.setMaxBounds(bounds);
-              leafletMapRef.current.setMinZoom(11);
+              leafletMapRef.current.setMinZoom(10);
 
               // Important: Call setView AFTER adding the circle. 
-              leafletMapRef.current.setView([lat, lng], 11, { animate: false });
+              leafletMapRef.current.setView([lat, lng], 10, { animate: false });
               if (markerRef.current) {
                 markerRef.current.setLatLng([lat, lng]);
               }

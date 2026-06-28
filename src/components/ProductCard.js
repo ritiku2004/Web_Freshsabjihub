@@ -58,7 +58,12 @@ export default function ProductCard({ product }) {
           </div>
         )}
 
-
+        {/* Discount Badge on Top Left */}
+        {hasDiscount && (
+          <div className={styles.discountBadgeTop}>
+            {discountPercent}% OFF
+          </div>
+        )}
 
         {/* Overlapping ADD Button (Bottom Right) */}
         {!isOutOfStock && (
@@ -100,12 +105,7 @@ export default function ProductCard({ product }) {
 
 
 
-        {/* Discount badge */}
-        {hasDiscount && (
-          <div className={styles.discountText}>
-            {discountPercent}% OFF
-          </div>
-        )}
+
 
         {/* Price Row */}
         <div className={styles.priceRow}>

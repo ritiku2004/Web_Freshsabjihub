@@ -130,6 +130,12 @@ export default function ProductDetailPage() {
                 <span className={styles.outOfStockText}>OUT OF STOCK</span>
               </div>
             )}
+            
+            {hasDiscount && (
+              <div className={styles.discountBadgeTop}>
+                {discountPercent}% OFF
+              </div>
+            )}
           </div>
         </section>
 
@@ -144,7 +150,6 @@ export default function ProductDetailPage() {
                 <div className={styles.priceRow}>
                   <span className={styles.discountPrice}>₹{discountPrice}</span>
                   <span className={styles.originalPrice}>₹{price}</span>
-                  <span className={styles.savingsLabel}>{discountPercent}% OFF</span>
                 </div>
               ) : (
                 <div className={styles.priceRow}>
