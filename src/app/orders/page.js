@@ -8,6 +8,7 @@ import { CartContext } from '../../context/CartContext';
 import SafeImage from '../../components/SafeImage';
 import Loader from '../../components/Loader';
 import { MOCK_PRODUCTS, INITIAL_ORDERS } from '../data';
+import { api } from '../../services/api';
 import styles from '../page.module.css';
 
 export default function OrdersPage() {
@@ -32,19 +33,61 @@ export default function OrdersPage() {
   }, [router]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('pastOrders');
-      if (saved) {
-        try {
-          setPastOrders(JSON.parse(saved));
-        } catch (e) {
-          setPastOrders(INITIAL_ORDERS);
+    const fetchOrders = async () => {
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const backendOrders = await api.getUserOrders(token);
+            if (backendOrders && backendOrders.length > 0) {
+              const mappedOrders = backendOrders.map(order => {
+                const parts = (order.address_line1 || '').split('||');
+                const flatNo = parts[0] || '';
+                const addressLine = parts[1] || '';
+                
+                return {
+                  id: order.id,
+                  orderNumber: order.order_number,
+                  date: new Date(order.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+                  status: order.status,
+                  paymentMethod: order.payment_method === 'ONLINE' ? 'Online / Prepaid' : 'Cash on Delivery',
+                  address: order.address_line1 ? `${flatNo}, ${addressLine}, City: ${order.city || 'N/A'}, Zip: ${order.zipcode || ''}` : 'Selected Address',
+                  items: (order.items || []).map(item => ({
+                    productId: item.product_id,
+                    name: item.product_name,
+                    quantity: item.quantity,
+                    price: Number(item.price)
+                  })),
+                  totalAmount: Number(order.total_amount),
+                  handlingCharge: Number(order.handling_fee),
+                  deliveryPartnerFee: Number(order.delivery_fee)
+                };
+              });
+              setPastOrders(mappedOrders);
+              localStorage.setItem('pastOrders', JSON.stringify(mappedOrders));
+              return;
+            }
+          } catch (error) {
+            console.error('Error syncing orders:', error);
+          }
         }
-      } else {
-        setPastOrders(INITIAL_ORDERS);
-        localStorage.setItem('pastOrders', JSON.stringify(INITIAL_ORDERS));
+        
+        // Fallback to local storage
+        const saved = localStorage.getItem('pastOrders');
+        if (saved) {
+          try {
+            setPastOrders(JSON.parse(saved));
+          } catch (e) {
+            setPastOrders(INITIAL_ORDERS);
+          }
+        } else {
+          setPastOrders(INITIAL_ORDERS);
+          localStorage.setItem('pastOrders', JSON.stringify(INITIAL_ORDERS));
+        }
       }
-    }
+    };
+    
+    fetchOrders();
   }, []);
 
   const handleReorder = (order) => {

@@ -430,6 +430,25 @@ export const api = {
     }
   },
 
+  // Fetch all user orders from backend
+  getUserOrders: async (token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/orders`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders');
+      }
+      const data = await response.json();
+      return data.data || [];
+    } catch (error) {
+      console.error('Error fetching user orders:', error);
+      throw error;
+    }
+  },
+
   // Verify payment on the Backend
   verifyPayment: async (paymentData, token) => {
     try {
