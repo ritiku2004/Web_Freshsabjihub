@@ -91,6 +91,12 @@ export default function OrdersPage() {
         <p className={styles.emptyStateText}>
           Please select a saved address or enter a valid zipcode to check serviceability and view past orders.
         </p>
+        <button 
+          className={styles.emptyStateBtn}
+          onClick={() => router.push('/addresses')}
+        >
+          Add Address
+        </button>
       </div>
     );
   }

@@ -510,6 +510,30 @@
   margin: 0;
 }
 
+.emptyStateBtn {
+  margin-top: 16px;
+  background: #0f7643;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(15, 118, 67, 0.2);
+}
+
+.emptyStateBtn:hover {
+  background: #0d6338;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(15, 118, 67, 0.3);
+}
+
+.emptyStateBtn:active {
+  transform: translateY(0);
+}
+
 /* --- Skeleton Loading --------------------------------- */
 .skeletonContainer {
   display: flex;

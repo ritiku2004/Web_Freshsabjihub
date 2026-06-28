@@ -37,6 +37,7 @@ export default function AddressesPage() {
   const [landmark, setLandmark] = useState('');
   const [city, setCity] = useState('');
   const [availableCities, setAvailableCities] = useState([]);
+  const [shops, setShops] = useState([]);
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [editingAddressId, setEditingAddressId] = useState(null);
@@ -46,14 +47,21 @@ export default function AddressesPage() {
   const mapRef = useRef(null);
   const leafletMapRef = useRef(null);
   const markerRef = useRef(null);
+  const circleRef = useRef(null);
   const isTypingRef = useRef(false);
+  const cityRef = useRef(city);
+  const shopsRef = useRef(shops);
+
+  useEffect(() => { cityRef.current = city; }, [city]);
+  useEffect(() => { shopsRef.current = shops; }, [shops]);
 
   // Fetch available cities on mount
   useEffect(() => {
     const loadCities = async () => {
       try {
-        const shops = await api.getShops();
-        const cities = [...new Set(shops.filter(s => s.is_active).map(s => s.city))];
+        const shopsList = await api.getShops();
+        setShops(shopsList);
+        const cities = [...new Set(shopsList.filter(s => s.is_active).map(s => s.city))];
         setAvailableCities(cities);
       } catch (err) {
         console.error('Error fetching shops/cities:', err);
@@ -123,19 +131,33 @@ export default function AddressesPage() {
       }).addTo(map);
 
       const marker = L.marker([28.6139, 77.2090], { draggable: true }).addTo(map);
-      marker.on('dragend', (e) => {
-        const coords = e.target.getLatLng();
+      
+      const checkAndSetCoords = (e) => {
+        const coords = e.latlng || e.target.getLatLng();
+        const currentCity = cityRef.current;
+        const currentShops = shopsRef.current;
+        if (currentCity && currentShops && currentShops.length > 0 && window.L) {
+          const shop = currentShops.find(s => s.city && s.city.toLowerCase() === currentCity.toLowerCase() && s.is_active);
+          if (shop && shop.latitude && shop.longitude) {
+            const dist = window.L.latLng(coords.lat, coords.lng).distanceTo([Number(shop.latitude), Number(shop.longitude)]);
+            if (dist > 15000) {
+              alert('Selected location is out of the delivery radius for ' + currentCity);
+              marker.setLatLng([Number(shop.latitude), Number(shop.longitude)]);
+              setLatitude(Number(shop.latitude));
+              setLongitude(Number(shop.longitude));
+              return;
+            }
+          }
+        }
+        
+        marker.setLatLng(coords);
         setLatitude(coords.lat);
         setLongitude(coords.lng);
         reverseGeocode(coords.lat, coords.lng);
-      });
+      };
 
-      map.on('click', (e) => {
-        marker.setLatLng(e.latlng);
-        setLatitude(e.latlng.lat);
-        setLongitude(e.latlng.lng);
-        reverseGeocode(e.latlng.lat, e.latlng.lng);
-      });
+      marker.on('dragend', checkAndSetCoords);
+      map.on('click', checkAndSetCoords);
 
       leafletMapRef.current = map;
       markerRef.current = marker;
@@ -162,8 +184,15 @@ export default function AddressesPage() {
   // Update map when lat/lng changes
   useEffect(() => {
     if (mapReady && leafletMapRef.current && markerRef.current && latitude && longitude) {
-      leafletMapRef.current.setView([latitude, longitude], 16);
       markerRef.current.setLatLng([latitude, longitude]);
+      
+      const currentCenter = leafletMapRef.current.getCenter();
+      if (window.L && currentCenter) {
+        const dist = currentCenter.distanceTo([latitude, longitude]);
+        if (dist > 500) {
+          leafletMapRef.current.setView([latitude, longitude], 16);
+        }
+      }
     }
   }, [latitude, longitude, mapReady]);
 
@@ -172,6 +201,49 @@ export default function AddressesPage() {
   useEffect(() => {
     if (!city) return;
     
+    // Check if we have the shop for this city to set a delivery radius
+    const shop = shops.find(s => s.city && s.city.toLowerCase() === city.toLowerCase() && s.is_active);
+    const radius = 15000; // Default 15km
+    
+    if (shop && shop.latitude && shop.longitude) {
+      const lat = Number(shop.latitude);
+      const lng = Number(shop.longitude);
+      setLatitude(lat);
+      setLongitude(lng);
+      
+      if (mapReady && leafletMapRef.current && markerRef.current) {
+        leafletMapRef.current.setView([lat, lng], 11);
+        markerRef.current.setLatLng([lat, lng]);
+        
+        // Remove old circle if exists
+        if (circleRef.current) {
+          leafletMapRef.current.removeLayer(circleRef.current);
+        }
+        
+        if (window.L) {
+          circleRef.current = window.L.circle([lat, lng], {
+            color: '#0f7643',
+            fillColor: '#0f7643',
+            fillOpacity: 0.1,
+            radius: radius,
+            interactive: false
+          }).addTo(leafletMapRef.current);
+          
+          // Lock map bounds and minZoom to keep user within radius
+          const bounds = circleRef.current.getBounds();
+          leafletMapRef.current.setMaxBounds(bounds);
+          leafletMapRef.current.setMinZoom(11);
+        }
+      }
+      return; // Skip nominatim since we found exact shop location
+    }
+
+    // If no shop matches, reset bounds
+    if (leafletMapRef.current) {
+      leafletMapRef.current.setMaxBounds(null);
+      leafletMapRef.current.setMinZoom(0);
+    }
+
     const timeoutId = setTimeout(async () => {
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city.trim())}&limit=1`);
@@ -196,7 +268,8 @@ export default function AddressesPage() {
     }, 1200);
 
     return () => clearTimeout(timeoutId);
-  }, [city]);
+  }, [city, shops]);
+
 
   // Refined search when user enters area/colony/sector
   useEffect(() => {
@@ -269,6 +342,30 @@ export default function AddressesPage() {
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
+        
+        // Check if within any active shop's radius
+        let isWithinService = false;
+        const currentShops = shopsRef.current;
+        if (window.L && currentShops && currentShops.length > 0) {
+           for (const shop of currentShops) {
+              if (shop.is_active && shop.latitude && shop.longitude) {
+                 const dist = window.L.latLng(lat, lng).distanceTo([Number(shop.latitude), Number(shop.longitude)]);
+                 if (dist <= 15000) {
+                    isWithinService = true;
+                    break;
+                 }
+              }
+           }
+        } else {
+           // Bypass if shops not loaded yet
+           isWithinService = true;
+        }
+        
+        if (!isWithinService) {
+           alert('Out of service location. We do not deliver to this area yet.');
+           return;
+        }
+
         setLatitude(lat);
         setLongitude(lng);
         reverseGeocode(lat, lng);

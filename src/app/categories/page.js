@@ -67,6 +67,12 @@ function CategoriesContent() {
         <p className={styles.emptyStateText}>
           Please select a saved address or enter a valid zipcode to browse category products.
         </p>
+        <button 
+          className={styles.emptyStateBtn}
+          onClick={() => router.push('/addresses')}
+        >
+          Add Address
+        </button>
       </div>
     );
   }

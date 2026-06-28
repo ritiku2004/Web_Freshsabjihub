@@ -143,6 +143,12 @@ export default function Home() {
         <p className={styles.emptyStateText}>
           Please select or add a saved address to check serviceability and browse products.
         </p>
+        <button 
+          className={styles.emptyStateBtn}
+          onClick={() => router.push('/addresses')}
+        >
+          Add Address
+        </button>
       </div>
     );
   }
