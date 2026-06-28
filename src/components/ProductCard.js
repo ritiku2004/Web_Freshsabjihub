@@ -58,10 +58,7 @@ export default function ProductCard({ product }) {
           </div>
         )}
 
-        {/* Veg Icon (Bottom Left) */}
-        <div className={styles.vegIcon}>
-          <div className={styles.vegDot} />
-        </div>
+
 
         {/* Overlapping ADD Button (Bottom Right) */}
         {!isOutOfStock && (

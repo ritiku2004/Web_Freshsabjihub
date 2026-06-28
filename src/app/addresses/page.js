@@ -166,16 +166,22 @@ export default function AddressesPage() {
       // Set initial position from existing address
       const existing = addresses.find(a => a.type === addressType);
       if (existing?.latitude && existing?.longitude) {
-        map.setView([existing.latitude, existing.longitude], 17);
+        map.setView([existing.latitude, existing.longitude], 17, { animate: false });
         marker.setLatLng([existing.latitude, existing.longitude]);
       }
     });
 
     return () => {
       if (leafletMapRef.current) {
-        leafletMapRef.current.remove();
+        try {
+          leafletMapRef.current.off();
+          leafletMapRef.current.remove();
+        } catch (e) {
+          console.error('Error removing map:', e);
+        }
         leafletMapRef.current = null;
         markerRef.current = null;
+        circleRef.current = null;
         setMapReady(false);
       }
     };
@@ -184,14 +190,18 @@ export default function AddressesPage() {
   // Update map when lat/lng changes
   useEffect(() => {
     if (mapReady && leafletMapRef.current && markerRef.current && latitude && longitude) {
-      markerRef.current.setLatLng([latitude, longitude]);
-      
-      const currentCenter = leafletMapRef.current.getCenter();
-      if (window.L && currentCenter) {
-        const dist = currentCenter.distanceTo([latitude, longitude]);
-        if (dist > 500) {
-          leafletMapRef.current.setView([latitude, longitude], 16);
+      try {
+        markerRef.current.setLatLng([latitude, longitude]);
+        
+        const currentCenter = leafletMapRef.current.getCenter();
+        if (window.L && currentCenter) {
+          const dist = currentCenter.distanceTo([latitude, longitude]);
+          if (dist > 500) {
+            leafletMapRef.current.setView([latitude, longitude], 16);
+          }
         }
+      } catch (e) {
+        console.error('Error updating map center:', e);
       }
     }
   }, [latitude, longitude, mapReady]);
@@ -212,27 +222,47 @@ export default function AddressesPage() {
       setLongitude(lng);
       
       if (mapReady && leafletMapRef.current && markerRef.current) {
-        leafletMapRef.current.setView([lat, lng], 11);
-        markerRef.current.setLatLng([lat, lng]);
-        
-        // Remove old circle if exists
-        if (circleRef.current) {
-          leafletMapRef.current.removeLayer(circleRef.current);
-        }
-        
-        if (window.L) {
-          circleRef.current = window.L.circle([lat, lng], {
-            color: '#0f7643',
-            fillColor: '#0f7643',
-            fillOpacity: 0.1,
-            radius: radius,
-            interactive: false
-          }).addTo(leafletMapRef.current);
+        try {
+          // Remove old circle if exists
+          if (circleRef.current) {
+            circleRef.current.remove();
+            circleRef.current = null;
+          }
           
-          // Lock map bounds and minZoom to keep user within radius
-          const bounds = circleRef.current.getBounds();
-          leafletMapRef.current.setMaxBounds(bounds);
-          leafletMapRef.current.setMinZoom(11);
+          if (window.L) {
+            const addCircleAndSetView = () => {
+              if (!leafletMapRef.current) return;
+              
+              circleRef.current = window.L.circle([lat, lng], {
+                color: '#0f7643',
+                fillColor: '#0f7643',
+                fillOpacity: 0.1,
+                radius: radius,
+                interactive: false
+              }).addTo(leafletMapRef.current);
+              
+              // Lock map bounds and minZoom to keep user within radius
+              const bounds = window.L.latLng(lat, lng).toBounds(radius * 2);
+              leafletMapRef.current.setMaxBounds(bounds);
+              leafletMapRef.current.setMinZoom(11);
+
+              // Important: Call setView AFTER adding the circle. 
+              leafletMapRef.current.setView([lat, lng], 11, { animate: false });
+              if (markerRef.current) {
+                markerRef.current.setLatLng([lat, lng]);
+              }
+            };
+
+            // If map is currently animating, adding a vector layer crashes Leaflet due to empty renderer bounds.
+            // Wait for zoomend before adding the circle.
+            if (leafletMapRef.current._animatingZoom) {
+              leafletMapRef.current.once('zoomend', addCircleAndSetView);
+            } else {
+              addCircleAndSetView();
+            }
+          }
+        } catch (err) {
+          console.error('Error updating shop map location:', err);
         }
       }
       return; // Skip nominatim since we found exact shop location
@@ -240,8 +270,12 @@ export default function AddressesPage() {
 
     // If no shop matches, reset bounds
     if (leafletMapRef.current) {
-      leafletMapRef.current.setMaxBounds(null);
-      leafletMapRef.current.setMinZoom(0);
+      try {
+        leafletMapRef.current.setMaxBounds([ [-90, -180], [90, 180] ]);
+        leafletMapRef.current.setMinZoom(0);
+      } catch (err) {
+        console.error('Error resetting bounds:', err);
+      }
     }
 
     const timeoutId = setTimeout(async () => {
