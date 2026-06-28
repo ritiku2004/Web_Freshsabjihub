@@ -453,7 +453,7 @@
 
 @media (max-width: 640px) {
   .checkoutPage {
-    margin: 12px auto 80px;
+    margin: 12px auto 20px;
     padding: 0 14px;
   }
   .card,
