@@ -118,6 +118,10 @@ function CheckoutContent() {
                 date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
                 status: 'Processing',
                 paymentStatus: 'Paid',
+                paymentMethod: 'Online / Prepaid',
+                address: activeAddress 
+                  ? `${activeAddress.flatNo || ''}, ${activeAddress.addressLine || ''}, ${activeAddress.landmark ? 'Landmark: ' + activeAddress.landmark + ', ' : ''}City: ${activeAddress.city || 'N/A'}, Zip: ${activeAddress.zipcode || ''}`
+                  : 'Selected Address',
                 items: cartItems.map(item => ({
                   productId: item.productId,
                   name: item.name,
@@ -165,6 +169,10 @@ function CheckoutContent() {
         orderNumber: rzpData.orderNumber,
         date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
         status: rzpData.status || 'Processing',
+        paymentMethod: 'Cash on Delivery',
+        address: activeAddress 
+          ? `${activeAddress.flatNo || ''}, ${activeAddress.addressLine || ''}, ${activeAddress.landmark ? 'Landmark: ' + activeAddress.landmark + ', ' : ''}City: ${activeAddress.city || 'N/A'}, Zip: ${activeAddress.zipcode || ''}`
+          : 'Selected Address',
         items: cartItems.map(item => ({
           productId: item.productId,
           name: item.name,

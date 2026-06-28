@@ -73,6 +73,8 @@ export const INITIAL_ORDERS = [
     orderNumber: 'ORD849201',
     date: 'June 18, 2026',
     status: 'Delivered',
+    paymentMethod: 'Online / Prepaid',
+    address: 'B-404, Green Valley Apartments, Landmark: Near Metro Station, City: New Delhi, Zip: 110021',
     items: [
       { productId: 'p3', name: 'Organic Hybrid Tomato', quantity: 2, price: 40 },
       { productId: 'p7', name: 'Amul Salted Butter', quantity: 1, price: 54 },
@@ -84,6 +86,8 @@ export const INITIAL_ORDERS = [
     orderNumber: 'ORD849195',
     date: 'June 12, 2026',
     status: 'Delivered',
+    paymentMethod: 'Cash on Delivery',
+    address: '12/A, Park Street, Landmark: Opposite Central Mall, City: Kolkata, Zip: 700016',
     items: [
       { productId: 'p4', name: 'Shimla Royal Apple', quantity: 1, price: 150 },
       { productId: 'p5', name: 'Robusta Banana', quantity: 1, price: 48 },
