@@ -127,6 +127,7 @@ function CheckoutContent() {
                   name: item.name,
                   quantity: item.quantity,
                   price: item.discountPrice,
+                  image: item.image,
                 })),
                 totalAmount: finalTotal,
               };
@@ -178,6 +179,7 @@ function CheckoutContent() {
           name: item.name,
           quantity: item.quantity,
           price: item.discountPrice,
+          image: item.image,
         })),
         totalAmount: finalTotal,
       };

@@ -56,7 +56,8 @@ export default function OrdersPage() {
                     productId: item.product_id,
                     name: item.product_name,
                     quantity: item.quantity,
-                    price: Number(item.price)
+                    price: Number(item.price),
+                    image: item.image_url
                   })),
                   totalAmount: Number(order.total_amount),
                   handlingCharge: Number(order.handling_fee),
@@ -210,7 +211,7 @@ export default function OrdersPage() {
                 <div className={styles.thumbnailScroll}>
                   {order.items.slice(0, 4).map((item, idx) => (
                     <div key={idx} className={styles.thumbnailWrapper}>
-                      <SafeImage src={getProductImage(item.productId)} alt={item.name} className={styles.thumbnailImage} />
+                      <SafeImage src={item.image || getProductImage(item.productId)} alt={item.name} className={styles.thumbnailImage} />
                       <div className={styles.thumbnailBadge}>
                         <span>{item.quantity}</span>
                       </div>

@@ -34,7 +34,7 @@ export default function OrderDetailPage() {
           const match = MOCK_PRODUCTS.find(p => p.id === item.productId);
           return {
             ...item,
-            image: match ? match.image : 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=150',
+            image: item.image || (match ? match.image : 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=150'),
             unit: match ? match.unit : '1 unit'
           };
         });
